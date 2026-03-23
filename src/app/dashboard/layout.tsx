@@ -28,7 +28,7 @@ const SIDEBAR_ITEMS = [
   { name: 'Pipeline', icon: Layers, href: '/dashboard/pipeline', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER'] },
   { name: 'My Tasks', icon: CheckSquare, href: '/dashboard/tasks', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER'] },
   { name: 'Sales Tracker', icon: BarChart3, href: '/dashboard/tracker', roles: ['ADMIN', 'SALES_MANAGER'] },
-  { name: 'Inbox', icon: MessageSquare, href: '/dashboard/inquiries', roles: ['ADMIN', 'SALES_MANAGER'] },
+  { name: 'Inbox', icon: MessageSquare, href: '/dashboard/inquiries', roles: ['ADMIN'] },
   { name: 'Notifications', icon: Bell, href: '/dashboard/notifications', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER'] },
   { name: 'Admin Panel', icon: Settings, href: '/dashboard/admin', roles: ['ADMIN'] },
 ]

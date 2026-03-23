@@ -74,8 +74,18 @@ export default function PipelinePage() {
   }
 
   useEffect(() => {
-    fetchLeads()
-    fetchInquiries()
+    async function init() {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+         const { data: { user } } = await supabase.auth.getUser()
+         if (user) {
+           const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+           if (profile) setUserRole(profile.role)
+         }
+      }
+      fetchLeads()
+      fetchInquiries()
+    }
+    init()
   }, [])
 
   const handleInquirySubmit = async (e: React.FormEvent) => {
@@ -169,64 +179,66 @@ export default function PipelinePage() {
       </section>
 
       {/* Inquire Us Section */}
-      <section className="space-y-8 bg-slate-900 p-10 rounded-3xl text-white shadow-2xl relative" id="inquire-us">
-          <div className="relative z-10 grid grid-cols-1 gap-10 max-w-2xl mx-auto">
-              <div className="space-y-6 bg-slate-800/50 p-8 rounded-2xl border border-slate-700">
-                  <h2 className="text-2xl font-bold font-display leading-tight flex items-center gap-3">
-                    <MessageSquare className="text-blue-500" size={28} />
-                    Inquire Us
-                  </h2>
-                  <form onSubmit={handleInquirySubmit} className="space-y-4">
-                      <input 
-                        required
-                        value={inquiryForm.name}
-                        onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
-                        className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
-                        placeholder="Client Name"
-                      />
-                      <input 
-                        required
-                        value={inquiryForm.phone}
-                        onChange={(e) => setInquiryForm({...inquiryForm, phone: e.target.value})}
-                        className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
-                        placeholder="Phone Number"
-                      />
-                      <textarea 
-                        required
-                        value={inquiryForm.message}
-                        onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
-                        rows={3}
-                        className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
-                        placeholder="Message..."
-                      />
-                      <div className="relative">
-                          <label className="text-xs font-bold text-slate-400 mb-2 block uppercase tracking-widest">Upload File (Optional)</label>
-                          <div className="border-2 border-dashed border-slate-700 rounded-xl p-4 flex items-center justify-center text-slate-400 hover:border-blue-500 hover:text-blue-400 transition-colors cursor-pointer bg-slate-900/50">
-                              <Upload size={20} className="mr-2" />
-                              <span className="text-sm font-semibold text-slate-300">
-                                  {inquiryForm.file_url ? `Selected: ${inquiryForm.file_url}` : 'Choose file or drag & drop'}
-                              </span>
-                              <input 
-                                type="file" 
-                                className="absolute inset-0 opacity-0 cursor-pointer" 
-                                onChange={(e) => {
-                                    if(e.target.files && e.target.files[0]) {
-                                        // Normally this would trigger a Supabase Storage upload, but for the scope 
-                                        // we capture the string so it saves to the DB column.
-                                        setInquiryForm({...inquiryForm, file_url: e.target.files[0].name})
-                                    }
-                                }}
-                              />
+      {userRole && ['SALES_MANAGER', 'SALES_EXECUTIVE'].includes(userRole) && (
+          <section className="space-y-8 bg-slate-900 p-10 rounded-3xl text-white shadow-2xl relative" id="inquire-us">
+              <div className="relative z-10 grid grid-cols-1 gap-10 max-w-2xl mx-auto">
+                  <div className="space-y-6 bg-slate-800/50 p-8 rounded-2xl border border-slate-700">
+                      <h2 className="text-2xl font-bold font-display leading-tight flex items-center gap-3">
+                        <MessageSquare className="text-blue-500" size={28} />
+                        Inquire Us
+                      </h2>
+                      <form onSubmit={handleInquirySubmit} className="space-y-4">
+                          <input 
+                            required
+                            value={inquiryForm.name}
+                            onChange={(e) => setInquiryForm({...inquiryForm, name: e.target.value})}
+                            className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
+                            placeholder="Client Name"
+                          />
+                          <input 
+                            required
+                            value={inquiryForm.phone}
+                            onChange={(e) => setInquiryForm({...inquiryForm, phone: e.target.value})}
+                            className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
+                            placeholder="Phone Number"
+                          />
+                          <textarea 
+                            required
+                            value={inquiryForm.message}
+                            onChange={(e) => setInquiryForm({...inquiryForm, message: e.target.value})}
+                            rows={3}
+                            className="w-full p-4 bg-slate-800 border border-slate-700 rounded-xl outline-none"
+                            placeholder="Message..."
+                          />
+                          <div className="relative">
+                              <label className="text-xs font-bold text-slate-400 mb-2 block uppercase tracking-widest">Upload File (Optional)</label>
+                              <div className="border-2 border-dashed border-slate-700 rounded-xl p-4 flex items-center justify-center text-slate-400 hover:border-blue-500 hover:text-blue-400 transition-colors cursor-pointer bg-slate-900/50">
+                                  <Upload size={20} className="mr-2" />
+                                  <span className="text-sm font-semibold text-slate-300">
+                                      {inquiryForm.file_url ? `Selected: ${inquiryForm.file_url}` : 'Choose file or drag & drop'}
+                                  </span>
+                                  <input 
+                                    type="file" 
+                                    className="absolute inset-0 opacity-0 cursor-pointer" 
+                                    onChange={(e) => {
+                                        if(e.target.files && e.target.files[0]) {
+                                            // Normally this would trigger a Supabase Storage upload, but for the scope 
+                                            // we capture the string so it saves to the DB column.
+                                            setInquiryForm({...inquiryForm, file_url: e.target.files[0].name})
+                                        }
+                                    }}
+                                  />
+                              </div>
                           </div>
-                      </div>
-                      <button className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]">
-                          {submittingInquiry ? 'Sending...' : 'Submit Message'}
-                          <Send size={18} />
-                      </button>
-                  </form>
+                          <button className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]">
+                              {submittingInquiry ? 'Sending...' : 'Submit Message'}
+                              <Send size={18} />
+                          </button>
+                      </form>
+                  </div>
               </div>
-          </div>
-      </section>
+          </section>
+      )}
 
       {/* Slide-over */}
       {selectedLeadId && (
