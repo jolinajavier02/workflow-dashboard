@@ -133,7 +133,7 @@ export const STAGE_COLUMNS = [
   { id: 'new', name: 'New', stages: [0, 1], color: 'blue' },
   { id: 'briefing', name: 'Briefing', stages: [2, 2.1, 3, 3.1], color: 'purple' },
   { id: 'production', name: 'In Production', stages: [4, 5, 6, 7, 7.1, 8, 8.1], color: 'amber' },
-  { id: 'dispatch', name: 'Dispatch', stages: [9, 9.1, 10, 11, 12, 13], color: 'indigo' },
+  { id: 'dispatch', name: 'Dispatch', stages: [9, 9.1, 10, 11, 12, 13], color: 'teal' },
   { id: 'follow-up', name: 'Follow-Up', stages: [14, 15, 16], color: 'rose' },
   { id: 'closing', name: 'Closing', stages: [17, 18, 19], color: 'emerald' },
 ];

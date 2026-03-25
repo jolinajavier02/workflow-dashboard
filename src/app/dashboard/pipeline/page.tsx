@@ -155,19 +155,11 @@ export default function PipelinePage() {
     leads: leads.filter(lead => column.stages.includes(lead.current_stage))
   }))
 
-  const roleColors: Record<string, string> = {
-      'owner': 'bg-purple-100 text-purple-700 border-purple-200',
-      'project_manager': 'bg-blue-100 text-blue-700 border-blue-200',
-      'admin': 'bg-slate-100 text-slate-700 border-slate-200',
-      'sales': 'bg-emerald-100 text-emerald-700 border-emerald-200',
-      'rnd': 'bg-amber-100 text-amber-700 border-amber-200'
-  }
-
   const dotColorMap: Record<string, string> = {
       'blue': 'bg-blue-500 shadow-blue-200',
       'purple': 'bg-purple-500 shadow-purple-200',
       'amber': 'bg-amber-500 shadow-amber-200',
-      'indigo': 'bg-indigo-500 shadow-indigo-200',
+      'teal': 'bg-teal-500 shadow-teal-200',
       'rose': 'bg-rose-500 shadow-rose-200',
       'emerald': 'bg-emerald-500 shadow-emerald-200'
   }
@@ -295,12 +287,12 @@ export default function PipelinePage() {
                           {/* 6. "I am a" Role Category */}
                           <div className="space-y-2">
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Contact Role Category *</label>
-                              <select 
-                                required 
-                                value={leadForm.role_category} 
-                                onChange={e => setLeadForm({...leadForm, role_category: e.target.value as any})} 
-                                className={`w-full px-4 py-3 bg-white border rounded-xl text-sm outline-none focus:ring-2 transition-all font-bold appearance-none ${roleColors[leadForm.role_category] || 'border-slate-200 focus:border-blue-500 focus:ring-blue-50 text-slate-700'}`}
-                              >
+                                <select 
+                                  required 
+                                  value={leadForm.role_category} 
+                                  onChange={e => setLeadForm({...leadForm, role_category: e.target.value as any})} 
+                                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-50 text-slate-700 transition-all font-bold appearance-none"
+                                >
                                   <option value="owner">Owner</option>
                                   <option value="project_manager">Project Manager</option>
                                   <option value="admin">Admin</option>

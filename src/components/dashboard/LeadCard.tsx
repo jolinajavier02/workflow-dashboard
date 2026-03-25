@@ -41,7 +41,7 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'blue': 'border-l-4 border-l-blue-500 hover:border-blue-500',
       'purple': 'border-l-4 border-l-purple-500 hover:border-purple-500',
       'amber': 'border-l-4 border-l-amber-500 hover:border-amber-500',
-      'indigo': 'border-l-4 border-l-indigo-500 hover:border-indigo-500',
+      'teal': 'border-l-4 border-l-teal-500 hover:border-teal-500',
       'rose': 'border-l-4 border-l-rose-500 hover:border-rose-500',
       'emerald': 'border-l-4 border-l-emerald-500 hover:border-emerald-500'
   }
@@ -50,9 +50,18 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'blue': 'text-blue-600',
       'purple': 'text-purple-600',
       'amber': 'text-amber-600',
-      'indigo': 'text-indigo-600',
+      'teal': 'text-teal-600',
       'rose': 'text-rose-600',
       'emerald': 'text-emerald-600'
+  }
+
+  const bgMap: Record<string, string> = {
+      'blue': 'bg-blue-500',
+      'purple': 'bg-purple-500',
+      'amber': 'bg-amber-500',
+      'teal': 'bg-teal-500',
+      'rose': 'bg-rose-500',
+      'emerald': 'bg-emerald-500'
   }
 
   return (
@@ -95,12 +104,12 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
         </span>
       </div>
       
-      {/* SLA progress bar */}
+      {/* Bottom strip progress bar colored by stage */}
       <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-100">
           <div 
             className={cn(
                 "h-full transition-all duration-300",
-                slaStatus === 'on_time' ? "bg-green-500" : slaStatus === 'at_risk' ? "bg-yellow-500" : "bg-red-500"
+                bgMap[color] || "bg-slate-500"
             )} 
             style={{ width: `${percentage}%` }}
           ></div>
