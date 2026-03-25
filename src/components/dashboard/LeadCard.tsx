@@ -11,7 +11,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export default function LeadCard({ lead, onClick }: { lead: Lead, onClick: () => void }) {
+export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: string, onClick: () => void }) {
   const [slaStatus, setSlaStatus] = useState<SLAStatus>('on_time')
   const [timeLeft, setTimeLeft] = useState<string>('')
   const [percentage, setPercentage] = useState<number>(100)
@@ -37,16 +37,35 @@ export default function LeadCard({ lead, onClick }: { lead: Lead, onClick: () =>
     setPercentage(Math.max(0, Math.min(100, (diff / 24) * 100)))
   }, [lead])
 
+  const colorMap: Record<string, string> = {
+      'blue': 'border-l-4 border-l-blue-500 hover:border-blue-500',
+      'purple': 'border-l-4 border-l-purple-500 hover:border-purple-500',
+      'amber': 'border-l-4 border-l-amber-500 hover:border-amber-500',
+      'indigo': 'border-l-4 border-l-indigo-500 hover:border-indigo-500',
+      'rose': 'border-l-4 border-l-rose-500 hover:border-rose-500',
+      'emerald': 'border-l-4 border-l-emerald-500 hover:border-emerald-500'
+  }
+  
+  const headerColorMap: Record<string, string> = {
+      'blue': 'text-blue-600',
+      'purple': 'text-purple-600',
+      'amber': 'text-amber-600',
+      'indigo': 'text-indigo-600',
+      'rose': 'text-rose-600',
+      'emerald': 'text-emerald-600'
+  }
+
   return (
     <div 
         onClick={onClick}
         className={cn(
-            "card group select-none relative overflow-hidden",
-            slaStatus === 'breached' && "border-red-400 bg-red-50/50"
+            "card group select-none relative overflow-hidden transition-all shadow-sm hover:shadow-md",
+            colorMap[color] || 'border-l-4 border-l-slate-500',
+            slaStatus === 'breached' && "bg-red-50/50"
         )}
     >
       <div className="flex justify-between items-start mb-3">
-        <span className="text-xs font-bold text-slate-500 tracking-wider group-hover:text-blue-600 transition-colors uppercase">
+        <span className={cn("text-xs font-bold uppercase tracking-wider transition-colors", headerColorMap[color] || "text-slate-500")}>
           {lead.lead_code}
         </span>
         <div className={cn(

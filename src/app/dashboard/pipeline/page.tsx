@@ -21,6 +21,12 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
 
 // Sample Mock Data for Demo Mode
 const MOCK_LEADS: Lead[] = [
@@ -157,6 +163,15 @@ export default function PipelinePage() {
       'rnd': 'bg-amber-100 text-amber-700 border-amber-200'
   }
 
+  const dotColorMap: Record<string, string> = {
+      'blue': 'bg-blue-500 shadow-blue-200',
+      'purple': 'bg-purple-500 shadow-purple-200',
+      'amber': 'bg-amber-500 shadow-amber-200',
+      'indigo': 'bg-indigo-500 shadow-indigo-200',
+      'rose': 'bg-rose-500 shadow-rose-200',
+      'emerald': 'bg-emerald-500 shadow-emerald-200'
+  }
+
   return (
     <div className="flex flex-col h-full space-y-12 relative overflow-y-auto overflow-x-hidden">
       
@@ -193,7 +208,7 @@ export default function PipelinePage() {
               <div key={column.id} className="flex-1 min-w-[250px] lg:min-w-[200px] flex flex-col max-h-full">
                 <div className="flex items-center justify-between mb-4 flex-shrink-0">
                   <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-6 bg-blue-500 rounded-full"></span>
+                      <span className={cn("w-2 h-6 rounded-full shadow-sm", dotColorMap[column.color] || "bg-slate-500")}></span>
                       <h2 className="font-bold text-slate-700 tracking-tight">{column.name}</h2>
                       <span className="bg-slate-200 text-slate-600 px-2 rounded-lg text-[10px] font-bold">
                           {column.leads.length}
@@ -203,7 +218,7 @@ export default function PipelinePage() {
                 
                 <div className="flex-1 overflow-y-auto pr-1 space-y-4">
                   {column.leads.map((lead) => (
-                    <LeadCard key={lead.id} lead={lead} onClick={() => setSelectedLeadId(lead.id)} />
+                    <LeadCard key={lead.id} lead={lead} color={column.color} onClick={() => setSelectedLeadId(lead.id)} />
                   ))}
                 </div>
               </div>
