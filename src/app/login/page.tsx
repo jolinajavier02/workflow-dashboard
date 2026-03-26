@@ -20,7 +20,27 @@ export default function LoginPage() {
     try {
       // Mock Login for demo if using placeholder URL
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-          toast.success('Mock Login Successful (Demo Mode)')
+          let role = 'ADMIN'
+          let name = 'System Administrator'
+
+          if (email.startsWith('owner')) {
+              role = 'OWNER'
+              name = 'Company Owner'
+          } else if (email.startsWith('project')) {
+              role = 'PROJECT_MANAGER'
+              name = 'Senior Project Manager'
+          } else if (email.startsWith('rnd')) {
+              role = 'RND_MANAGER'
+              name = 'R&D Director'
+          } else if (email.startsWith('sales')) {
+              role = 'SALES_MANAGER'
+              name = 'Sales Manager'
+          }
+
+          localStorage.setItem('demo_auth_user_role', role)
+          localStorage.setItem('demo_auth_user_name', name)
+          
+          toast.success(`Logged in as ${name} (Demo)`)
           router.push('/dashboard/pipeline')
           return
       }
@@ -95,9 +115,13 @@ export default function LoginPage() {
             {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" />}
           </button>
 
-          <div className="pt-4 border-t border-slate-100 flex flex-col gap-2 items-center text-xs text-slate-500">
-            <p>Admin: admin@workflow.com / Password123!</p>
-            <p>Sales: manager@workflow.com / Password123!</p>
+          <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider">
+            <p>admin@workflow.com</p>
+            <p>sales@workflow.com</p>
+            <p>owner@workflow.com</p>
+            <p>project@workflow.com</p>
+            <p>rnd@workflow.com</p>
+            <p className="col-span-2 text-center text-slate-400 mt-1 italic">Password: any</p>
           </div>
         </form>
       </div>

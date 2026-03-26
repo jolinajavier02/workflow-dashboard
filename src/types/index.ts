@@ -21,6 +21,7 @@ export interface Lead {
   lead_source?: string;
   priority?: 'high' | 'medium' | 'low';
   document_url?: string;
+  is_trashed?: boolean;
   current_stage: number;
   assigned_sales_manager?: string;
   assigned_sales_executive?: string;

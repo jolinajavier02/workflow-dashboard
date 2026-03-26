@@ -43,25 +43,38 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('role, full_name')
-          .eq('id', user.id)
-          .single()
-        
-        if (profile) {
-          setUserRole(profile.role)
-          setUserName(profile.full_name)
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('role, full_name')
+            .eq('id', user.id)
+            .single()
+          
+          if (profile) {
+            setUserRole(profile.role)
+            setUserName(profile.full_name)
+          }
         }
+      } else {
+          // Demo Mode Retrieve Session
+          const role = localStorage.getItem('demo_auth_user_role') as Role
+          const name = localStorage.getItem('demo_auth_user_name')
+          if (role) setUserRole(role)
+          if (name) setUserName(name)
       }
     }
     getUser()
   }, [])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        await supabase.auth.signOut()
+    } else {
+        localStorage.removeItem('demo_auth_user_role')
+        localStorage.removeItem('demo_auth_user_name')
+    }
     router.push('/login')
   }
 

@@ -17,7 +17,11 @@ import {
   Layers,
   Phone,
   Mail,
-  FileText
+  FileText,
+  Trash2,
+  RefreshCcw,
+  Archive,
+  AlertTriangle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
@@ -28,19 +32,18 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Sample Mock Data for Demo Mode
-const MOCK_LEADS: Lead[] = [
-    { id: 'LD-001', lead_code: 'LD-001', company_name: 'Nexus Corp', client_name: 'Alex Johnson', requirement_details: 'Sample Formulation', role_category: 'owner', priority: 'high', current_stage: 0, status: 'active', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: 'LD-002', lead_code: 'LD-002', company_name: 'Stellar Labs', client_name: 'Maria Garcia', requirement_details: 'Packaging Design', role_category: 'rnd', priority: 'medium', current_stage: 4, status: 'active', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-    { id: 'LD-003', lead_code: 'LD-003', company_name: 'Global Biotech', client_name: 'John Smith', requirement_details: 'Bulk Order Enquiry', role_category: 'admin', priority: 'low', current_stage: 8, status: 'active', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-]
+// removed hardcoded MOCK_LEADS as requested for a blank dashboard per account
 
 export default function PipelinePage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
-  const [userRole, setUserRole] = useState<Role | null>('SALES_MANAGER') // Default for demo
+  const [userRole, setUserRole] = useState<Role | null>(null) // Start null to allow useEffect auth retrieval
   
+  // History & Trash Modal State
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false)
+  const [historyTab, setHistoryTab] = useState<'history' | 'trash'>('history')
+
   // Create Lead Modal State
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -62,9 +65,14 @@ export default function PipelinePage() {
   const fetchLeads = async () => {
     setLoading(true)
     
-    // DEMO MODE: Load mock data if placeholder
+    // DEMO MODE: Load from browser data store file (localStorage) for persistent accounts
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        setLeads(MOCK_LEADS)
+        const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
+        const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
+        // Filter by the account the user logged in as to ensure dashboard blank setups are properly isolated
+        const accountLeads = allStoredLeads.filter((l: any) => l.assigned_account_role === userRole)
+        
+        setLeads(accountLeads.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
         setLoading(false)
         return
     }
@@ -90,11 +98,15 @@ export default function PipelinePage() {
            const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
            if (profile) setUserRole(profile.role)
          }
+      } else {
+         // Mock authentication retrieval for the placeholder mode
+         const savedRole = localStorage.getItem('demo_auth_user_role')
+         if (savedRole) setUserRole(savedRole as Role)
       }
       fetchLeads()
     }
     init()
-  }, [])
+  }, [userRole])
 
   const handleCreateLead = async (e: React.FormEvent) => {
       e.preventDefault()
@@ -102,17 +114,24 @@ export default function PipelinePage() {
       
       try {
           if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-              const newMockLead: Lead = {
+              const newMockLead = {
                   id: Math.random().toString(),
-                  lead_code: `LD-${Math.floor(Math.random()*1000)}`,
+                  lead_code: `LD-${Math.floor(Math.random()*10000)}`,
                   ...leadForm,
                   current_stage: 0,
                   status: 'active',
+                  assigned_account_role: userRole,
+                  is_trashed: false,
                   created_at: new Date().toISOString(),
                   updated_at: new Date().toISOString()
               } as Lead
+              
+              const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
+              const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
+              localStorage.setItem('demo_data_store_leads', JSON.stringify([newMockLead, ...allStoredLeads]))
+              
               setLeads([newMockLead, ...leads])
-              toast.success('Demo: Lead Created successfully!')
+              toast.success('Lead Created & transaction stored locally!')
           } else {
               const leadCodeQuery = await supabase.rpc('generate_lead_code') // Hypothetical or manually generated.
               // Let's manually generate a dummy code safely if rpc not there.
@@ -150,9 +169,58 @@ export default function PipelinePage() {
       }
   }
 
+  const handleTrashLead = async (id: string, toTrash: boolean) => {
+      try {
+          if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+              const updatedAccountLeads = leads.map(l => l.id === id ? { ...l, is_trashed: toTrash } : l)
+              
+              const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
+              const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
+              const mergedLeads = allStoredLeads.map((l: any) => l.id === id ? { ...l, is_trashed: toTrash } : l)
+              
+              localStorage.setItem('demo_data_store_leads', JSON.stringify(mergedLeads))
+              setLeads(updatedAccountLeads)
+              toast.success(toTrash ? 'Moved to Trash' : 'Recovered successfully')
+              return
+          }
+          const { error } = await supabase.from('leads').update({ is_trashed: toTrash }).eq('id', id)
+          if (error) throw error
+          setLeads(leads.map(l => l.id === id ? { ...l, is_trashed: toTrash } : l))
+          toast.success(toTrash ? 'Moved to Trash' : 'Recovered successfully')
+      } catch (err: any) {
+          toast.error(err.message || 'Operation failed')
+      }
+  }
+
+  const handleDeleteForever = async (id: string) => {
+      if (!confirm('Are you sure you want to permanently delete this lead? This action cannot be undone.')) return
+      try {
+          if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+              const updatedAccountLeads = leads.filter(l => l.id !== id)
+              
+              const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
+              const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
+              const mergedLeads = allStoredLeads.filter((l: any) => l.id !== id)
+              
+              localStorage.setItem('demo_data_store_leads', JSON.stringify(mergedLeads))
+              setLeads(updatedAccountLeads)
+              toast.success('Deleted permanently')
+              return
+          }
+          const { error } = await supabase.from('leads').delete().eq('id', id)
+          if (error) throw error
+          setLeads(leads.filter(l => l.id !== id))
+          toast.success('Deleted permanently')
+      } catch (err: any) {
+          toast.error(err.message || 'Operation failed')
+      }
+  }
+
+  // Filter pipeline to ignore trashed leads
+  const activeLeads = leads.filter(l => !l.is_trashed)
   const groupedLeads = STAGE_COLUMNS.map(column => ({
     ...column,
-    leads: leads.filter(lead => column.stages.includes(lead.current_stage))
+    leads: activeLeads.filter(lead => column.stages.includes(lead.current_stage))
   }))
 
   const dotColorMap: Record<string, string> = {
@@ -175,10 +243,10 @@ export default function PipelinePage() {
               <p className="text-slate-500 text-sm mt-1">Manage active sampling workflows and stakeholder approvals.</p>
             </div>
             <div className="flex items-center gap-2">
-                <button onClick={fetchLeads} className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm" title="Refresh">
+                <button onClick={() => fetchLeads()} className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm" title="Refresh">
                     <RotateCcw size={20} />
                 </button>
-                <button className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm relative group" title="View Lead History">
+                <button onClick={() => setIsHistoryOpen(true)} className="p-3 bg-white border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-all shadow-sm relative group" title="View Lead History">
                     <History size={20} />
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-blue-500 rounded-full border-2 border-white"></span>
                 </button>
@@ -367,6 +435,122 @@ export default function PipelinePage() {
                       <button form="create-lead-form" type="submit" disabled={isSubmitting} className="px-8 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50">
                           {isSubmitting ? 'Creating Lead...' : 'Create Lead & Save Transaction'}
                       </button>
+                  </div>
+              </div>
+          </div>
+      )}
+
+      {/* History & Trash Slide-over/Modal */}
+      {isHistoryOpen && (
+          <div className="fixed inset-0 z-[150] flex items-center justify-center p-4">
+              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsHistoryOpen(false)}></div>
+              <div className="relative bg-white rounded-3xl w-full max-w-6xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+                  
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-8 py-5 border-b border-slate-100 flex-shrink-0">
+                      <div>
+                          <h2 className="text-2xl font-bold font-display text-slate-900 flex items-center gap-3">
+                              <Archive className="text-blue-600" /> Lead History & Archive
+                          </h2>
+                          <p className="text-sm text-slate-500 mt-1">Review all logged pipeline entries, attachments, and manage trashed leads.</p>
+                      </div>
+                      <button onClick={() => setIsHistoryOpen(false)} className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors">
+                          <X size={24} />
+                      </button>
+                  </div>
+
+                  {/* Tabs */}
+                  <div className="flex items-center gap-6 px-8 border-b border-slate-100 bg-slate-50/50 flex-shrink-0">
+                      <button onClick={() => setHistoryTab('history')} className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-colors ${historyTab === 'history' ? 'border-blue-600 text-blue-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                          All Leads History
+                      </button>
+                      <button onClick={() => setHistoryTab('trash')} className={`py-4 font-bold text-sm tracking-wide border-b-2 transition-colors flex items-center gap-2 ${historyTab === 'trash' ? 'border-red-600 text-red-700' : 'border-transparent text-slate-500 hover:text-slate-800'}`}>
+                          <Trash2 size={16} /> Trash Bin
+                      </button>
+                  </div>
+                  
+                  {/* Body Lists */}
+                  <div className="flex-1 overflow-y-auto p-8 bg-slate-50/50">
+                      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm shadow-slate-200/50">
+                          <div className="overflow-x-auto">
+                              <table className="w-full text-left text-sm border-collapse">
+                                  <thead>
+                                      <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold text-[10px] border-b border-slate-100">
+                                          <th className="p-4 rounded-tl-xl whitespace-nowrap">Lead Code</th>
+                                          <th className="p-4 whitespace-nowrap">Client Base</th>
+                                          <th className="p-4 whitespace-nowrap">Contact Role</th>
+                                          <th className="p-4 whitespace-nowrap">Source & Priority</th>
+                                          <th className="p-4 whitespace-nowrap">Details & File</th>
+                                          <th className="p-4 text-right rounded-tr-xl">Actions</th>
+                                      </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-slate-100">
+                                      {leads.filter(l => historyTab === 'trash' ? l.is_trashed : !l.is_trashed).map(lead => (
+                                          <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
+                                              <td className="p-4">
+                                                  <span className="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded text-xs tracking-wider">
+                                                    {lead.lead_code}
+                                                  </span>
+                                                  <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
+                                                    {format(new Date(lead.created_at || new Date()), 'MMM dd, yyyy')}
+                                                  </div>
+                                              </td>
+                                              <td className="p-4">
+                                                  <div className="font-bold text-slate-900">{lead.company_name}</div>
+                                                  <div className="text-slate-500 text-xs mt-0.5">{lead.client_name}</div>
+                                                  <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1.5 font-medium"><Phone size={10} className="text-slate-300"/>{lead.client_phone || 'N/A'}</div>
+                                              </td>
+                                              <td className="p-4">
+                                                  <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600">
+                                                      {lead.role_category}
+                                                  </span>
+                                              </td>
+                                              <td className="p-4 space-y-1">
+                                                  <div className="text-xs font-semibold text-slate-700">{lead.lead_source || 'Unknown'}</div>
+                                                  <div className={`text-[10px] font-bold uppercase ${lead.priority === 'high' ? 'text-rose-600' : lead.priority === 'low' ? 'text-slate-400' : 'text-amber-600'}`}>
+                                                      {lead.priority} Priority
+                                                  </div>
+                                              </td>
+                                              <td className="p-4">
+                                                  <div className="text-xs text-slate-600 line-clamp-2 max-w-[200px] leading-relaxed mb-1 italic">"{lead.requirement_details}"</div>
+                                                  {lead.document_url && (
+                                                      <span className="inline-flex items-center gap-1 text-[10px] text-blue-600 font-bold uppercase tracking-wider bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100">
+                                                          <FileText size={10} /> Attached
+                                                      </span>
+                                                  )}
+                                              </td>
+                                              <td className="p-4 min-w-[140px]">
+                                                  <div className="flex items-center justify-end gap-2">
+                                                      {historyTab === 'history' ? (
+                                                          <button onClick={() => handleTrashLead(lead.id, true)} className="flex items-center gap-1 px-3 py-2 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+                                                              <Trash2 size={12} /> Trash
+                                                          </button>
+                                                      ) : (
+                                                          <>
+                                                              <button onClick={() => handleTrashLead(lead.id, false)} className="flex items-center gap-1 px-3 py-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+                                                                  <RefreshCcw size={12} /> Recover
+                                                              </button>
+                                                              <button onClick={() => handleDeleteForever(lead.id)} className="flex items-center gap-1 px-3 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg text-xs font-bold transition-all shadow-md shadow-red-200 whitespace-nowrap">
+                                                                  <AlertTriangle size={12} /> Delete Forever
+                                                              </button>
+                                                          </>
+                                                      )}
+                                                  </div>
+                                              </td>
+                                          </tr>
+                                      ))}
+                                      {leads.filter(l => historyTab === 'trash' ? l.is_trashed : !l.is_trashed).length === 0 && (
+                                          <tr>
+                                              <td colSpan={6} className="p-12 text-center text-slate-400">
+                                                  {historyTab === 'trash' ? <Trash2 size={32} className="mx-auto mb-3 opacity-20" /> : <Archive size={32} className="mx-auto mb-3 opacity-20" />}
+                                                  <p className="font-medium text-sm">No records found here.</p>
+                                              </td>
+                                          </tr>
+                                      )}
+                                  </tbody>
+                              </table>
+                          </div>
+                      </div>
                   </div>
               </div>
           </div>

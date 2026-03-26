@@ -196,6 +196,7 @@ SELECT
   lead_source,
   priority,
   document_url,
+  is_trashed,
   current_stage,
   assigned_sales_manager,
   assigned_sales_executive,
