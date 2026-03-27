@@ -69,8 +69,11 @@ export default function PipelinePage() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
         const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
-        // Filter by the account the user logged in as to ensure dashboard blank setups are properly isolated
-        const accountLeads = allStoredLeads.filter((l: any) => l.assigned_account_role === userRole)
+        // OWNER account sees EVERYTHING. Other accounts only see their own created leads for isolation.
+        const accountLeads = allStoredLeads.filter((l: any) => {
+            if (userRole === 'OWNER') return true;
+            return l.assigned_account_role === userRole;
+        })
         
         setLeads(accountLeads.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
         setLoading(false)
@@ -254,7 +257,7 @@ export default function PipelinePage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input placeholder="Search Lead ID..." className="pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-64 outline-none" />
                 </div>
-                {['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE'].includes(userRole!) && (
+                {['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'OWNER', 'PROJECT_MANAGER'].includes(userRole!) && (
                     <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-blue-600 font-bold text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
                         <Plus size={20} />
                         <span>New Lead</span>
