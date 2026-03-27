@@ -257,7 +257,7 @@ export default function PipelinePage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input placeholder="Search Lead ID..." className="pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-64 outline-none" />
                 </div>
-                {['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'OWNER', 'PROJECT_MANAGER'].includes(userRole!) && (
+                {['OWNER', 'ADMIN', 'SALES_MANAGER'].includes(userRole!) && (
                     <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-blue-600 font-bold text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">
                         <Plus size={20} />
                         <span>New Lead</span>
