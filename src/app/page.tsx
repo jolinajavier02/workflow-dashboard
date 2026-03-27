@@ -31,38 +31,37 @@ export default function LandingPage() {
     return (
         <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-white relative">
             
-            {/* Left Side: Accurate Global Analytics Graph */}
-            <div className="relative hidden md:flex md:w-1/2 h-full bg-slate-950 overflow-hidden">
-                <img 
-                    src="/landing-hero.png" 
-                    alt="Analytics Graph" 
-                    className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-[20s] hover:scale-110"
-                />
-                
-                {/* Floating Glass Metric */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-full max-w-sm px-6">
-                     <div className="backdrop-blur-xl bg-white/5 p-8 rounded-[2.5rem] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in duration-700">
-                         <div className="flex items-center justify-between mb-6">
-                            <div className="w-10 h-10 bg-blue-500/20 rounded-xl flex items-center justify-center border border-blue-400/30">
-                                <Activity className="text-blue-400" size={20} />
-                            </div>
-                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-widest bg-blue-400/10 px-2 py-1 rounded">Real-time</span>
-                         </div>
-                         <h3 className="text-2xl font-black text-white mb-2">Live Efficiency</h3>
-                         <p className="text-blue-200/60 text-sm leading-relaxed mb-6 font-medium">
-                             Monitoring manufacturing throughput and sales velocity across all departments.
-                         </p>
-                         <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                             <div className="h-full w-[85%] bg-gradient-to-r from-blue-500 to-teal-400 animate-pulse"></div>
-                         </div>
-                     </div>
-                </div>
+            {/* Left Side: Blue Analytics Illustration */}
+            <div className="relative hidden md:flex md:w-1/2 h-full bg-gradient-to-br from-blue-50 via-slate-100 to-blue-100 overflow-hidden items-center justify-center">
 
-                <div className="absolute bottom-12 left-12">
-                     <div className="flex items-center gap-4 text-white/40">
-                         <Database size={16} />
-                         <span className="text-[10px] font-bold uppercase tracking-[0.3em]">Scalable Infrastructure</span>
-                     </div>
+                {/* Decorative background circles */}
+                <div className="absolute top-10 left-10 w-48 h-48 bg-blue-200/40 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-16 right-8 w-64 h-64 bg-blue-300/30 rounded-full blur-3xl"></div>
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-100/50 rounded-full blur-3xl"></div>
+
+                {/* Hero Illustration */}
+                <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-10">
+                    <img
+                        src="/workflow-dashboard/landing-hero.png"
+                        alt="Sales Analytics Dashboard"
+                        className="w-full max-w-lg object-contain drop-shadow-2xl animate-in fade-in zoom-in duration-700"
+                    />
+
+                    {/* Floating stat card */}
+                    <div className="absolute bottom-16 left-10 bg-white/80 backdrop-blur-md px-5 py-4 rounded-2xl shadow-xl border border-blue-100 flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
+                            <Activity className="text-white" size={18} />
+                        </div>
+                        <div>
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pipeline Active</div>
+                            <div className="text-sm font-black text-slate-800">6 Stages Live</div>
+                        </div>
+                    </div>
+
+                    {/* Top badge */}
+                    <div className="absolute top-10 right-10 bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full shadow-lg shadow-blue-200">
+                        Real-time Tracking
+                    </div>
                 </div>
             </div>
 
