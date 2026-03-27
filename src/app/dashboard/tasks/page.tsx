@@ -33,9 +33,10 @@ export default function TasksPage() {
           const ownedStages = STAGES.filter(s => s.owner === role).map(s => s.number)
           
           if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+              const ownedStageNums = ownedStages as number[]
               const mockTasks: Lead[] = [
-                  { id: 'LD-001', lead_code: 'LD-001', client_name: 'Nexus Corp', requirement_details: 'Sample Formulation', current_stage: 0, status: 'active', created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-              ].filter(t => ownedStages.includes(t.current_stage));
+                  { id: 'LD-001', lead_code: 'LD-001', client_name: 'Nexus Corp', requirement_details: 'Sample Formulation', current_stage: 0, status: 'active' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+              ].filter(t => ownedStageNums.includes(t.current_stage));
               setTasks(mockTasks)
           } else {
               const { data: leadsData } = await supabase
