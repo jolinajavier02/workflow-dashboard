@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { 
   ArrowRight, 
   CheckCircle2, 
@@ -41,9 +42,12 @@ export default function LandingPage() {
 
                 {/* Hero Illustration */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-10">
-                    <img
-                        src="/workflow-dashboard/landing-hero.png"
+                    <Image
+                        src="/landing-hero.png"
                         alt="Sales Analytics Dashboard"
+                        width={560}
+                        height={480}
+                        priority
                         className="w-full max-w-lg object-contain drop-shadow-2xl animate-in fade-in zoom-in duration-700"
                     />
 
