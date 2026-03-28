@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   basePath: '/workflow-dashboard',
+  trailingSlash: true,
 };
 
 export default nextConfig;
