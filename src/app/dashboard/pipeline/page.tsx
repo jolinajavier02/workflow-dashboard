@@ -69,14 +69,10 @@ export default function PipelinePage() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
         const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
-        // OWNER, RND_MANAGER, and PROJECT_MANAGER see ALL leads across all accounts (full board visibility)
-        // ADMIN and SALES_MANAGER see only leads created within their own account scope
-        const accountLeads = allStoredLeads.filter((l: any) => {
-            if (userRole === 'OWNER' || userRole === 'RND_MANAGER' || userRole === 'PROJECT_MANAGER') return true;
-            return l.assigned_account_role === userRole;
-        })
+        // All accounts (Owner, Admin, Sales, R&D, PM) now see ALL leads for full pipeline visibility
+        const accountLeads = allStoredLeads.filter((l: any) => !l.is_trashed)
         
-        setLeads(accountLeads.filter((l: any) => !l.is_trashed).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
+        setLeads(accountLeads.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()))
         setLoading(false)
         return
     }
