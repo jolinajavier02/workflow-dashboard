@@ -35,6 +35,9 @@ export default function LoginPage() {
           } else if (email.startsWith('sales')) {
               role = 'SALES_MANAGER'
               name = 'Sales Manager'
+          } else if (email.startsWith('packaging')) {
+              role = 'PACKAGING_MANAGER'
+              name = 'Packaging Manager'
           }
 
           localStorage.setItem('demo_auth_user_role', role)
@@ -121,6 +124,7 @@ export default function LoginPage() {
             <p>owner@workflow.com</p>
             <p>project@workflow.com</p>
             <p>rnd@workflow.com</p>
+            <p>packaging@workflow.com</p>
             <p className="col-span-2 text-center text-slate-400 mt-1 italic">Password: any</p>
           </div>
         </form>

@@ -5,7 +5,8 @@ import { Lead, STAGES, StageLog, Role } from '@/types'
 import { createClient } from '@/lib/supabase/client'
 import { 
   X, Clock, CheckCircle2, FileText, ChevronRight, Layers, 
-  Zap, Phone, Mail, Building2, User, Tag, AlertTriangle, Paperclip
+  Zap, Phone, Mail, Building2, User, Tag, AlertTriangle, Paperclip,
+  Globe, Smartphone, Hash, Database, FlaskConical, Package
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { clsx, type ClassValue } from 'clsx'
@@ -17,8 +18,6 @@ function cn(...inputs: ClassValue[]) {
 
 // Full access: Owner, Admin, Sales Manager
 const FULL_ACCESS_ROLES: Role[] = ['OWNER', 'ADMIN', 'SALES_MANAGER']
-// Limited access: RND and Project Manager
-const LIMITED_ACCESS_ROLES: Role[] = ['RND_MANAGER', 'PROJECT_MANAGER']
 
 export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId: string, onClose: () => void, userRole: Role | null }) {
   const [lead, setLead] = useState<Lead | null>(null)
@@ -76,9 +75,19 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
   )
 
   const isImage = (url: string) => /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url)
-  const isFullAccess = userRole && FULL_ACCESS_ROLES.includes(userRole)
-  const isLimited = userRole && LIMITED_ACCESS_ROLES.includes(userRole)
-
+  
+  // Visibility Logic based on User Role and the provided image matrix
+  const canSeeClientName = userRole && [...FULL_ACCESS_ROLES, 'PROJECT_MANAGER' as Role].includes(userRole)
+  const canSeePhone = userRole && FULL_ACCESS_ROLES.includes(userRole)
+  const canSeeEmail = userRole && [...FULL_ACCESS_ROLES, 'PROJECT_MANAGER' as Role].includes(userRole)
+  const canSeeWhatsApp = userRole && FULL_ACCESS_ROLES.includes(userRole)
+  const canSeeCompany = userRole && FULL_ACCESS_ROLES.includes(userRole)
+  const canSeeSource = userRole && [...FULL_ACCESS_ROLES, 'PROJECT_MANAGER' as Role].includes(userRole)
+  const canSeeFormulation = userRole && [...FULL_ACCESS_ROLES, 'RND_MANAGER' as Role].includes(userRole)
+  const canSeePackaging = userRole && [...FULL_ACCESS_ROLES, 'RND_MANAGER' as Role, 'PACKAGING_MANAGER' as Role].includes(userRole)
+  const canSeeRequirements = userRole && [...FULL_ACCESS_ROLES, 'PROJECT_MANAGER' as Role, 'PACKAGING_MANAGER' as Role].includes(userRole)
+  
+  // Lead ID, Role Category, Priority, and Brief Attachment are always visible (Black in all columns)
   const priorityColor = lead.priority === 'high' 
     ? 'text-red-600 bg-red-50 border-red-200' 
     : lead.priority === 'low' 
@@ -108,13 +117,12 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
               </span>
           </div>
 
-          {/* Full-access shows client name in header; limited shows generic label */}
-          {isFullAccess ? (
+          {canSeeClientName ? (
             <>
               <h2 className="text-3xl font-black tracking-tight">{lead.client_name || '—'}</h2>
               <p className="text-slate-400 text-sm mt-1 flex items-center gap-2">
                 <Building2 size={13} className="text-slate-500" />
-                {lead.company_name || '—'}
+                {canSeeCompany ? (lead.company_name || '—') : '******'}
                 <span className="text-slate-700">·</span>
                 <ChevronRight size={13} className="text-slate-500" />
                 <span className="capitalize">{lead.role_category} lead</span>
@@ -135,63 +143,127 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
       {/* ── Body ── */}
       <div className="flex-1 overflow-y-auto p-7 space-y-6">
 
-        {/* ── FULL ACCESS FIELDS (Owner / Admin / Sales) ── */}
-        {isFullAccess && (
-          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-100">
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Client Information</h4>
+        {/* ── CONTACT INFORMATION (Owner / Admin / Sales / PM) ── */}
+        {(canSeeClientName || canSeePhone || canSeeEmail || canSeeWhatsApp || canSeeCompany) && (
+          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-slate-100 bg-white">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Contact Information</h4>
             </div>
-            <div className="divide-y divide-slate-100">
-              {/* Name */}
-              <div className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <User size={14} className="text-blue-600" />
+            <div className="divide-y divide-slate-100 bg-white">
+              {/* Name (Limited for RD/Pkg) */}
+              {canSeeClientName && (
+                <div className="flex items-start gap-4 px-6 py-4">
+                  <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <User size={14} className="text-blue-600" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Client Name</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.client_name || '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Full Name</span>
-                  <span className="text-sm font-bold text-slate-800">{lead.client_name || '—'}</span>
-                </div>
-              </div>
+              )}
               {/* Phone */}
-              <div className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Phone size={14} className="text-emerald-600" />
+              {canSeePhone && (
+                <div className="flex items-start gap-4 px-6 py-4">
+                  <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Phone size={14} className="text-emerald-600" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Phone Number</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.client_phone || '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Phone Number</span>
-                  <span className="text-sm font-bold text-slate-800">{lead.client_phone || '—'}</span>
-                </div>
-              </div>
+              )}
               {/* Email */}
-              <div className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Mail size={14} className="text-purple-600" />
+              {canSeeEmail && (
+                <div className="flex items-start gap-4 px-6 py-4">
+                  <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Mail size={14} className="text-purple-600" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Email Address</span>
+                    <span className="text-sm font-bold text-slate-800 break-all">{lead.client_email || '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Email Address</span>
-                  <span className="text-sm font-bold text-slate-800 break-all">{lead.client_email || '—'}</span>
+              )}
+              {/* WhatsApp */}
+              {canSeeWhatsApp && (
+                <div className="flex items-start gap-4 px-6 py-4">
+                  <div className="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Hash size={14} className="text-green-600" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">WhatsApp Number</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.client_whatsapp || '—'}</span>
+                  </div>
                 </div>
-              </div>
+              )}
               {/* Company */}
-              <div className="flex items-start gap-4 px-6 py-4">
-                <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Building2 size={14} className="text-amber-600" />
+              {canSeeCompany && (
+                <div className="flex items-start gap-4 px-6 py-4">
+                  <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Building2 size={14} className="text-amber-600" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Company Name</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.company_name || '—'}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Company Name</span>
-                  <span className="text-sm font-bold text-slate-800">{lead.company_name || '—'}</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         )}
 
-        {/* ── SHARED FIELDS (All 5 roles) ── */}
-        <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
-            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Lead Classification</h4>
+        {/* ── TECHNICAL DETAILS (RD / Packaging / Sales) ── */}
+        {(canSeeFormulation || canSeePackaging || canSeeRequirements) && (
+          <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+            <div className="px-6 py-4 border-b border-slate-100 bg-white">
+              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Technical Details</h4>
+            </div>
+            <div className="p-6 space-y-6 bg-white">
+              {/* Formulation */}
+              {canSeeFormulation && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <FlaskConical size={14} className="text-indigo-500" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Formulation Details</span>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed font-medium bg-indigo-50/50 border border-indigo-100 rounded-xl p-4">
+                    {lead.formulation_details || '—'}
+                  </p>
+                </div>
+              )}
+              {/* Packaging */}
+              {canSeePackaging && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Package size={14} className="text-orange-500" />
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Packaging Details</span>
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed font-medium bg-orange-50/50 border border-orange-100 rounded-xl p-4">
+                    {lead.packaging_details || '—'}
+                  </p>
+                </div>
+              )}
+              {/* Requirements */}
+              {canSeeRequirements && (
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Requirement Details</span>
+                  <p className="text-sm text-slate-700 leading-relaxed font-medium italic bg-slate-50 border border-slate-100 rounded-xl p-4">
+                    "{lead.requirement_details || 'No details provided.'}"
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100">
+        )}
+
+        {/* ── CLASSIFICATION (Always Visible) ── */}
+        <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-100 bg-white">
+            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Lead Meta</h4>
+          </div>
+          <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 bg-white">
             <div className="px-6 py-4">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Contact Role</span>
               <span className="text-sm font-black text-blue-600 capitalize">{lead.role_category || '—'}</span>
@@ -203,21 +275,20 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
               </span>
             </div>
           </div>
-          {/* Requirements */}
-          <div className="px-6 py-5">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-3">Requirement Details</span>
-            <p className="text-sm text-slate-700 leading-relaxed font-medium italic bg-white border border-slate-100 rounded-xl p-4">
-              "{lead.requirement_details || 'No details provided.'}"
-            </p>
-          </div>
+          {canSeeSource && (
+            <div className="px-6 py-4 bg-white">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Lead Source</span>
+               <span className="text-sm font-extrabold text-slate-700">{lead.lead_source || 'Website'}</span>
+            </div>
+          )}
         </div>
 
-        {/* ── ATTACHMENT (All 5 roles) ── */}
-        <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100">
+        {/* ── ATTACHMENT (Always Visible) ── */}
+        <div className="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
+          <div className="px-6 py-4 border-b border-slate-100 bg-white">
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Brief Attachment</h4>
           </div>
-          <div className="p-5">
+          <div className="p-5 bg-white">
             {lead.document_url ? (
               isImage(lead.document_url) ? (
                 <img
@@ -226,8 +297,8 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                   className="w-full h-56 object-cover rounded-2xl border border-slate-200 shadow-md"
                 />
               ) : (
-                <div className="flex items-center gap-4 p-5 bg-white border border-slate-200 rounded-2xl">
-                  <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center border border-blue-100 flex-shrink-0">
+                <div className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-200 rounded-2xl">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-slate-100 flex-shrink-0">
                     <Paperclip size={20} className="text-blue-600" />
                   </div>
                   <div>
@@ -244,9 +315,9 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
           </div>
         </div>
 
-        {/* ── RND APPROVAL (RND Manager only, stage 0) ── */}
+        {/* ── ACTION PANELS (Role Specific Transitions) ── */}
         {userRole === 'RND_MANAGER' && lead.current_stage === 0 && (
-          <div className="bg-slate-900 p-7 rounded-2xl relative overflow-hidden">
+          <div className="bg-slate-900 p-7 rounded-2xl relative overflow-hidden shadow-xl shadow-blue-900/20">
             <div className="absolute top-0 right-0 p-6 opacity-5">
               <Zap size={100} className="text-white" />
             </div>
@@ -261,7 +332,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
               </p>
               <button
                 onClick={handleApproveForBriefing}
-                className="w-full py-4 bg-blue-600 text-white font-extrabold rounded-xl hover:bg-blue-500 transition-all hover:scale-[1.01] active:scale-95 shadow-lg text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+                className="w-full py-4 bg-blue-600 text-white font-extrabold rounded-xl hover:bg-blue-500 transition-all hover:scale-[1.01] active:scale-95 shadow-lg text-sm uppercase tracking-widest flex items-center justify-center gap-2 underline decoration-blue-400/50"
               >
                 <CheckCircle2 size={18} />
                 Okay to Proceed for Briefing
@@ -270,23 +341,21 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
           </div>
         )}
 
-        {/* ── Pipeline Status (non-RND or already briefing) ── */}
-        {!(userRole === 'RND_MANAGER' && lead.current_stage === 0) && (
-          <div className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl">
-            <div className="w-10 h-10 bg-slate-200/80 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Clock size={18} className="text-slate-500" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pipeline Stage</span>
-              <span className="text-sm font-bold text-slate-800">
-                {STAGES.find(s => s.number === lead.current_stage)?.name || 'Lead Received'}
-              </span>
-            </div>
-            <span className="ml-auto px-3 py-1.5 bg-white border border-slate-200 text-[10px] font-black text-slate-500 rounded-lg uppercase tracking-widest">
-              {userRole}
+        {/* ── Status HUD ── */}
+        <div className="flex items-center gap-4 p-5 bg-slate-50 border border-slate-100 rounded-2xl shadow-inner">
+          <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+            <Clock size={18} className="text-slate-500" />
+          </div>
+          <div>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Pipeline Stage</span>
+            <span className="text-sm font-bold text-slate-800">
+              {STAGES.find(s => s.number === lead.current_stage)?.name || 'Lead Received'}
             </span>
           </div>
-        )}
+          <span className="ml-auto px-3 py-1.5 bg-white border border-slate-200 text-[10px] font-black text-slate-500 rounded-lg uppercase tracking-widest">
+            {userRole}
+          </span>
+        </div>
 
       </div>
     </div>

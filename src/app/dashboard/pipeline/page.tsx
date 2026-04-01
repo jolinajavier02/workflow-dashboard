@@ -53,10 +53,12 @@ export default function PipelinePage() {
       client_email: '',
       client_whatsapp: '',
       company_name: '',
-      role_category: 'owner', // 'owner' | 'project_manager' | 'admin' | 'sales' | 'rnd'
+      role_category: 'owner',
       requirement_details: '',
+      formulation_details: '',
+      packaging_details: '',
       lead_source: 'Website',
-      priority: 'medium', // 'high' | 'medium' | 'low'
+      priority: 'medium',
       document_url: ''
   })
   
@@ -69,10 +71,10 @@ export default function PipelinePage() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
         const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
-        // OWNER, RND_MANAGER, and PROJECT_MANAGER see ALL leads across all accounts (full board visibility)
+        // OWNER, RND_MANAGER, PROJECT_MANAGER, and PACKAGING_MANAGER see ALL leads across all accounts (full board visibility)
         // ADMIN and SALES_MANAGER see only leads created within their own account scope
         const accountLeads = allStoredLeads.filter((l: any) => {
-            if (userRole === 'OWNER' || userRole === 'RND_MANAGER' || userRole === 'PROJECT_MANAGER') return true;
+            if (userRole === 'OWNER' || userRole === 'RND_MANAGER' || userRole === 'PROJECT_MANAGER' || userRole === 'PACKAGING_MANAGER') return true;
             return l.assigned_account_role === userRole;
         })
         
@@ -164,6 +166,7 @@ export default function PipelinePage() {
           setLeadForm({
               client_name: '', client_phone: '', client_email: '', client_whatsapp: '',
               company_name: '', role_category: 'owner', requirement_details: '',
+              formulation_details: '', packaging_details: '',
               lead_source: 'Website', priority: 'medium', document_url: ''
           })
       } catch (err: any) {
@@ -370,6 +373,7 @@ export default function PipelinePage() {
                                   <option value="admin">Admin</option>
                                   <option value="sales">Sales</option>
                                   <option value="rnd">R&D</option>
+                                  <option value="packaging_manager">Packaging Manager</option>
                               </select>
                           </div>
                           
@@ -395,7 +399,31 @@ export default function PipelinePage() {
                               </select>
                           </div>
                           
-                          {/* 9. Requirement Details (Full Width) */}
+                          {/* 9. Formulation Details (Full Width) */}
+                          <div className="space-y-2 md:col-span-2">
+                              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Formulation Details</label>
+                              <textarea 
+                                value={leadForm.formulation_details} 
+                                onChange={e => setLeadForm({...leadForm, formulation_details: e.target.value})} 
+                                rows={2} 
+                                className="w-full p-4 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium resize-none shadow-sm" 
+                                placeholder="Describe formulation specific requirements..."
+                              />
+                          </div>
+
+                          {/* 10. Packaging Details (Full Width) */}
+                          <div className="space-y-2 md:col-span-2">
+                              <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Packaging Details</label>
+                              <textarea 
+                                value={leadForm.packaging_details} 
+                                onChange={e => setLeadForm({...leadForm, packaging_details: e.target.value})} 
+                                rows={2} 
+                                className="w-full p-4 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium resize-none shadow-sm" 
+                                placeholder="Describe packaging specific requirements..."
+                              />
+                          </div>
+
+                          {/* 11. Requirement Details (Full Width) */}
                           <div className="space-y-2 md:col-span-2">
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Requirement Details *</label>
                               <textarea 
@@ -403,12 +431,12 @@ export default function PipelinePage() {
                                 value={leadForm.requirement_details} 
                                 onChange={e => setLeadForm({...leadForm, requirement_details: e.target.value})} 
                                 rows={3} 
-                                className="w-full p-4 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium resize-none" 
-                                placeholder="Describe the sample formulation or packaging needs..."
+                                className="w-full p-4 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium resize-none shadow-sm" 
+                                placeholder="Describe the overall project requirements..."
                               />
                           </div>
 
-                          {/* 10. File Upload (Full Width) */}
+                          {/* 12. File Upload (Full Width) */}
                           <div className="space-y-2 md:col-span-2">
                                <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Attach Requirement Brief (Optional)</label>
                                <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:border-blue-400 hover:bg-blue-50/50 transition-colors cursor-pointer group bg-white">

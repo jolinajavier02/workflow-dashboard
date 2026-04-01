@@ -16,8 +16,10 @@ export interface Lead {
   client_email?: string;
   client_whatsapp?: string;
   company_name?: string;
-  role_category?: 'owner' | 'project_manager' | 'admin' | 'sales' | 'rnd';
+  role_category?: string;
   requirement_details: string;
+  formulation_details?: string;
+  packaging_details?: string;
   lead_source?: string;
   priority?: 'high' | 'medium' | 'low';
   document_url?: string;
