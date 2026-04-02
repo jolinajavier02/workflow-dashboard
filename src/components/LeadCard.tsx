@@ -1,36 +1,17 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Clock, AlertTriangle, User } from 'lucide-react'
-import { Lead, SLAStatus } from '@/types'
-import { differenceInHours, parseISO, formatDistanceToNow } from 'date-fns'
+import { Clock, User } from 'lucide-react'
+import { Lead } from '@/types'
+import { format, parseISO } from 'date-fns'
 import { cn } from '@/utils/cn'
 
 export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: string, onClick: () => void }) {
-  const [slaStatus, setSlaStatus] = useState<SLAStatus>('on_time')
-  const [timeLeft, setTimeLeft] = useState<string>('')
-  const [percentage, setPercentage] = useState<number>(100)
+  const [percentage, setPercentage] = useState<number>(0)
 
-  // In a real app, deadline would be fetched from stage_logs table for the current stage.
-  // For demo, we'll simulate an SLA starting from lead creation + some hours.
   useEffect(() => {
-    const deadlineStr = '2026-03-30T10:00:00Z' // Dummy deadline
-    const deadline = parseISO(deadlineStr)
-    const now = new Date()
-    const diff = differenceInHours(deadline, now)
-    
-    // Simple logic for colors
-    if (diff < 2) {
-      setSlaStatus('breached')
-    } else if (diff < 12) {
-      setSlaStatus('at_risk')
-    } else {
-      setSlaStatus('on_time')
-    }
-    
-    setTimeLeft(formatDistanceToNow(deadline, { addSuffix: true }))
-    setPercentage(Math.max(0, Math.min(100, (diff / 24) * 100)))
-  }, [lead])
+    setPercentage((lead.current_stage / 19) * 100)
+  }, [lead.current_stage])
 
   const colorMap: Record<string, string> = {
       'blue': 'border-l-4 border-l-blue-500 hover:border-blue-500',
@@ -42,16 +23,6 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'slate': 'border-l-4 border-l-slate-400 hover:border-slate-500',
   }
   
-  const headerColorMap: Record<string, string> = {
-      'blue': 'text-blue-600',
-      'purple': 'text-purple-600',
-      'amber': 'text-amber-600',
-      'teal': 'text-teal-600',
-      'rose': 'text-rose-600',
-      'emerald': 'text-emerald-600',
-      'slate': 'text-slate-500',
-  }
-
   const bgMap: Record<string, string> = {
       'blue': 'bg-blue-500',
       'purple': 'bg-purple-500',
@@ -62,59 +33,46 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'slate': 'bg-slate-400',
   }
 
+  const formattedTime = lead.last_viewed_at ? format(parseISO(lead.last_viewed_at), 'HH:mm') : '--:--'
+
   return (
     <div 
         onClick={onClick}
         className={cn(
-            "card group select-none relative overflow-hidden transition-all shadow-sm hover:shadow-md",
-            colorMap[color] || 'border-l-4 border-l-slate-500',
-            slaStatus === 'breached' && "bg-red-50/50"
+            "card group select-none relative overflow-hidden transition-all shadow-sm hover:shadow-md py-4 px-5",
+            colorMap[color] || 'border-l-4 border-l-slate-500'
         )}
     >
       <div className="flex justify-between items-start mb-3">
-        <span className={cn("text-xs font-bold uppercase tracking-wider transition-colors", headerColorMap[color] || "text-slate-500")}>
+        <div className="px-2 py-0.5 bg-slate-900 rounded text-[10px] font-black text-white tracking-widest leading-none">
           LD-{lead.lead_id}
-        </span>
-        <div className="flex items-center gap-2">
-            {lead.color_status && <div className={cn("w-2 h-2 rounded-full",
-                lead.color_status === 'YELLOW' ? 'bg-amber-500' : 
-                lead.color_status === 'RED' ? 'bg-red-500' : 
-                lead.color_status === 'GREEN' ? 'bg-emerald-500' : 
-                lead.color_status === 'BLUE' ? 'bg-blue-500' : 'bg-slate-400'
-            )}></div>}
-            <div className={cn(
-                "badge px-1.5 py-0.5 rounded flex items-center gap-1",
-                slaStatus === 'on_time' ? "badge-green" : slaStatus === 'at_risk' ? "badge-yellow" : "badge-red"
-            )}>
-              {slaStatus === 'breached' ? <AlertTriangle size={12} /> : <Clock size={12} />}
-              <span className="text-[10px] font-bold uppercase">{slaStatus.replace('_', ' ')}</span>
-            </div>
+        </div>
+        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded border border-slate-100">
+           <User size={10} className="text-slate-400" />
+           <span className="text-[10px] font-black text-slate-800">{lead.current_stage}</span>
         </div>
       </div>
 
-      <h3 className="font-semibold text-slate-800 line-clamp-2 mb-2 leading-tight">
+      <h3 className="font-bold text-slate-900 text-sm line-clamp-1 mb-1 leading-tight">
         {lead.client_name || "Lead #" + lead.lead_id}
       </h3>
       
-      <p className="text-xs text-slate-500 mb-4 line-clamp-2 italic">
-        {lead.requirement_details}
+      <p className="text-[10px] font-bold text-slate-400 mb-3 line-clamp-1 leading-relaxed italic">
+        "{lead.company_name || 'abc'}"
       </p>
 
-      <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
-        <div className="flex items-center gap-1 text-slate-400">
-          <User size={14} />
-          <span className="text-[10px] font-medium uppercase tracking-tight">Stage {lead.current_stage}</span>
-        </div>
-        <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">
-          {timeLeft}
-        </span>
+      <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-1">
+         <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <Clock size={10} className="text-slate-300" />
+            <span>Updated: {formattedTime}</span>
+         </div>
       </div>
       
       {/* Bottom strip progress bar colored by stage */}
-      <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-100">
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-slate-50 opacity-20">
           <div 
             className={cn(
-                "h-full transition-all duration-300",
+                "h-full transition-all duration-700",
                 bgMap[color] || "bg-slate-500"
             )} 
             style={{ width: `${percentage}%` }}

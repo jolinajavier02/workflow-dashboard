@@ -49,11 +49,11 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
       try {
           let targetStage = lead.current_stage
 
-          // Mapping Colors to the New 5 Stages
-          if (status === 'YELLOW') targetStage = 1   // R&D
-          if (status === 'RED')    targetStage = 0   // New / Follow Up
-          if (status === 'GREEN')  targetStage = 3   // Dispatch
-          if (status === 'BLUE')   targetStage = 4   // Closing
+          // Mapping Colors to Stages as requested
+          if (status === 'YELLOW') targetStage = 5   // In Progress
+          if (status === 'RED')    targetStage = 16  // Follow Up
+          if (status === 'GREEN')  targetStage = 11  // Dispatch
+          if (status === 'BLUE')   targetStage = 19  // Closing
           if (status === 'GRAY')   targetStage = 0   // New
 
           await updateLeadData({ 

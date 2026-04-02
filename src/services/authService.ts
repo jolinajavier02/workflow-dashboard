@@ -116,5 +116,29 @@ export const authService = {
     const { data: profile, error } = await supabase.from('profiles').insert([{ ...data, id: Math.random().toString() }]).select().single()
     if (error) throw error
     return { ...profile, user_id: profile.id } as Profile
+  },
+
+  async updateProfileStatus(userId: string | number, isActive: boolean) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+        const idx = profiles.findIndex((p: any) => p.user_id === userId)
+        if (idx > -1) {
+            profiles[idx].is_active = isActive
+            localStorage.setItem('demo_profiles', JSON.stringify(profiles))
+            
+            const currentUser = await this.getUserProfile()
+            if (currentUser) {
+                await activityService.log(
+                    currentUser, 
+                    isActive ? 'Recover Account' : 'Delete Account', 
+                    `${isActive ? 'Recovered' : 'Deleted'} account for ${profiles[idx].full_name}`
+                )
+            }
+        }
+        return
+    }
+
+    const { error } = await supabase.from('profiles').update({ is_active: isActive }).eq('id', userId)
+    if (error) throw error
   }
 }

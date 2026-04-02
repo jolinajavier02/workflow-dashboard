@@ -128,25 +128,42 @@ export default function PipelinePage() {
                 const lead = activeLeads.find(l => l.id === selectedLeadId)!
                 let targetStage = lead.current_stage
 
-                // Mapping Colors to the New 5 Stages
-                if (status === 'YELLOW') targetStage = 1   // R&D
-                if (status === 'RED')    targetStage = 0   // New / Follow Up
-                if (status === 'GREEN')  targetStage = 3   // Dispatch
-                if (status === 'BLUE')   targetStage = 4   // Closing
-                if (status === 'GRAY')   targetStage = 0   // New
+                // Functional Stage Progression 
+                if (status === 'PM_FOLLOW_UP') {
+                    targetStage = 14 // Move to Follow-Up
+                } else if (status === 'PM_CLOSING') {
+                    targetStage = 17 // Move to Closing
+                } else {
+                    // NEW -> PRODUCTION
+                    if (lead.current_stage <= 3.1) {
+                        targetStage = 4 
+                    }
+                    // PRODUCTION -> DISPATCH
+                    else if (lead.current_stage >= 4 && lead.current_stage <= 8.1) {
+                        targetStage = 9
+                    }
+                    // DISPATCH -> FOLLOW-UP
+                    else if (lead.current_stage >= 9 && lead.current_stage <= 13) {
+                        targetStage = 14
+                    }
+                }
 
                 const { leadService } = await import('@/services/leadService')
                 const { activityService } = await import('@/services/activityService')
                 
                 await leadService.updateLead(Number(lead.id), { 
-                    color_status: status,
                     current_stage: targetStage,
                     last_viewed_by: userProfile?.full_name,
                     last_viewed_at: new Date().toISOString()
                 })
 
                 if (userProfile) {
-                    await activityService.log(userProfile, `Status Update: ${status}`, comment, lead.id)
+                    await activityService.log(
+                        userProfile, 
+                        status === 'PM_FOLLOW_UP' ? 'Sent to Follow-Up' : status === 'PM_CLOSING' ? 'Sent to Closing' : `Shifted to Stage ${targetStage}`, 
+                        comment, 
+                        lead.id
+                    )
                 }
 
                 fetchLeads() // Refresh list
