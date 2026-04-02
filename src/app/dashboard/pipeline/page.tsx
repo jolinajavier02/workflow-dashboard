@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/api/supabase/client'
 import { Lead, STAGE_COLUMNS, STAGES, Role, Inquiry } from '@/types'
 import LeadCard from '@/components/dashboard/LeadCard'
 import LeadDetailPanel from '@/components/dashboard/LeadDetailPanel'
+import { cn } from '@/utils/cn'
 import { 
   Plus, 
   Search, 
@@ -25,12 +26,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
 
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
 
 // removed hardcoded MOCK_LEADS as requested for a blank dashboard per account
 
@@ -49,17 +45,17 @@ export default function PipelinePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [leadForm, setLeadForm] = useState({
       client_name: '',
-      client_phone: '',
-      client_email: '',
-      client_whatsapp: '',
+      phone_number: '',
+      email_address: '',
+      whatsapp_number: '',
       company_name: '',
-      role_category: 'owner',
+      contact_role_category: 'owner',
       requirement_details: '',
       formulation_details: '',
       packaging_details: '',
       lead_source: 'Website',
       priority: 'medium',
-      document_url: ''
+      requirement_brief: ''
   })
   
   const supabase = createClient()
@@ -122,10 +118,11 @@ export default function PipelinePage() {
           if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
               const newMockLead = {
                   id: Math.random().toString(),
-                  lead_code: `LD-${Math.floor(Math.random()*10000)}`,
+                  lead_id: Math.floor(Math.random()*10000),
                   ...leadForm,
                   current_stage: 0,
                   status: 'active',
+                  created_by: 1,
                   assigned_account_role: userRole,
                   is_trashed: false,
                   created_at: new Date().toISOString(),
@@ -139,13 +136,11 @@ export default function PipelinePage() {
               setLeads([newMockLead, ...leads])
               toast.success('Lead Created & transaction stored locally!')
           } else {
-              const leadCodeQuery = await supabase.rpc('generate_lead_code') // Hypothetical or manually generated.
-              // Let's manually generate a dummy code safely if rpc not there.
-              const lead_code = `LD-${Math.floor(Math.random()*10000)}`
+              const lead_id = Math.floor(Math.random()*10000)
               
-              const insertData = { ...leadForm, lead_code }
-              if (!insertData.document_url) delete (insertData as any).document_url
-              if (!insertData.client_whatsapp) delete (insertData as any).client_whatsapp
+              const insertData = { ...leadForm, lead_id }
+              if (!insertData.requirement_brief) delete (insertData as any).requirement_brief
+              if (!insertData.whatsapp_number) delete (insertData as any).whatsapp_number
 
               // 1. Insert Lead
               const { data: newLead, error } = await supabase.from('leads').insert([insertData]).select().single()
@@ -164,10 +159,10 @@ export default function PipelinePage() {
           }
           setIsCreateOpen(false)
           setLeadForm({
-              client_name: '', client_phone: '', client_email: '', client_whatsapp: '',
-              company_name: '', role_category: 'owner', requirement_details: '',
+              client_name: '', phone_number: '', email_address: '', whatsapp_number: '',
+              company_name: '', contact_role_category: 'owner', requirement_details: '',
               formulation_details: '', packaging_details: '',
-              lead_source: 'Website', priority: 'medium', document_url: ''
+              lead_source: 'Website', priority: 'medium', requirement_brief: ''
           })
       } catch (err: any) {
           toast.error('Failed to create lead: ' + err.message)
@@ -328,7 +323,7 @@ export default function PipelinePage() {
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Phone Number *</label>
                               <div className="relative">
                                   <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                  <input required value={leadForm.client_phone} onChange={e => setLeadForm({...leadForm, client_phone: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="+1 555-0100" />
+                                  <input required value={leadForm.phone_number} onChange={e => setLeadForm({...leadForm, phone_number: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="+1 555-0100" />
                               </div>
                           </div>
                           
@@ -337,7 +332,7 @@ export default function PipelinePage() {
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Email Address *</label>
                               <div className="relative">
                                   <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                  <input required type="email" value={leadForm.client_email} onChange={e => setLeadForm({...leadForm, client_email: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="jane@example.com" />
+                                  <input required type="email" value={leadForm.email_address} onChange={e => setLeadForm({...leadForm, email_address: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="jane@example.com" />
                               </div>
                           </div>
                           
@@ -346,7 +341,7 @@ export default function PipelinePage() {
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">WhatsApp Number</label>
                               <div className="relative">
                                   <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                  <input value={leadForm.client_whatsapp} onChange={e => setLeadForm({...leadForm, client_whatsapp: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="Optional" />
+                                  <input value={leadForm.whatsapp_number} onChange={e => setLeadForm({...leadForm, whatsapp_number: e.target.value})} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-50 transition-all font-medium" placeholder="Optional" />
                               </div>
                           </div>
                           
@@ -364,8 +359,8 @@ export default function PipelinePage() {
                               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Contact Role Category *</label>
                                 <select 
                                   required 
-                                  value={leadForm.role_category} 
-                                  onChange={e => setLeadForm({...leadForm, role_category: e.target.value as any})} 
+                                  value={leadForm.contact_role_category} 
+                                  onChange={e => setLeadForm({...leadForm, contact_role_category: e.target.value as any})} 
                                   className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:border-blue-500 focus:ring-blue-50 text-slate-700 transition-all font-bold appearance-none"
                                 >
                                   <option value="owner">Owner</option>
@@ -442,7 +437,7 @@ export default function PipelinePage() {
                                <div className="relative border-2 border-dashed border-slate-200 rounded-xl p-6 flex flex-col items-center justify-center text-slate-500 hover:border-blue-400 hover:bg-blue-50/50 transition-colors cursor-pointer group bg-white">
                                    <Upload size={24} className="mb-2 text-slate-400 group-hover:text-blue-500 transition-colors" />
                                    <span className="text-sm font-bold text-slate-700">
-                                       {leadForm.document_url ? `Selected: ${leadForm.document_url}` : 'Click to Browse or Drag & Drop File'}
+                                       {leadForm.requirement_brief ? `Selected: ${leadForm.requirement_brief}` : 'Click to Browse or Drag & Drop File'}
                                    </span>
                                    <span className="text-xs text-slate-400 font-medium mt-1">PDF, DOCX, JPG (Max 5MB)</span>
                                    <input 
@@ -450,7 +445,7 @@ export default function PipelinePage() {
                                      className="absolute inset-0 opacity-0 cursor-pointer" 
                                      onChange={(e) => {
                                          if(e.target.files && e.target.files[0]) {
-                                             setLeadForm({...leadForm, document_url: e.target.files[0].name})
+                                             setLeadForm({...leadForm, requirement_brief: e.target.files[0].name})
                                          }
                                      }}
                                    />
@@ -521,7 +516,7 @@ export default function PipelinePage() {
                                           <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
                                               <td className="p-4">
                                                   <span className="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded text-xs tracking-wider">
-                                                    {lead.lead_code}
+                                                    LD-{lead.lead_id}
                                                   </span>
                                                   <div className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
                                                     {format(new Date(lead.created_at || new Date()), 'MMM dd, yyyy')}
@@ -530,11 +525,11 @@ export default function PipelinePage() {
                                               <td className="p-4">
                                                   <div className="font-bold text-slate-900">{lead.company_name}</div>
                                                   <div className="text-slate-500 text-xs mt-0.5">{lead.client_name}</div>
-                                                  <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1.5 font-medium"><Phone size={10} className="text-slate-300"/>{lead.client_phone || 'N/A'}</div>
+                                                  <div className="text-[10px] text-slate-400 mt-1 flex items-center gap-1.5 font-medium"><Phone size={10} className="text-slate-300"/>{lead.phone_number || 'N/A'}</div>
                                               </td>
                                               <td className="p-4">
                                                   <span className="px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600">
-                                                      {lead.role_category}
+                                                      {lead.contact_role_category}
                                                   </span>
                                               </td>
                                               <td className="p-4 space-y-1">
@@ -545,7 +540,7 @@ export default function PipelinePage() {
                                               </td>
                                               <td className="p-4">
                                                   <div className="text-xs text-slate-600 line-clamp-2 max-w-[200px] leading-relaxed mb-1 italic">"{lead.requirement_details}"</div>
-                                                  {lead.document_url && (
+                                                  {lead.requirement_brief && (
                                                       <span className="inline-flex items-center gap-1 text-[10px] text-blue-600 font-bold uppercase tracking-wider bg-blue-50/50 px-1.5 py-0.5 rounded border border-blue-100">
                                                           <FileText size={10} /> Attached
                                                       </span>

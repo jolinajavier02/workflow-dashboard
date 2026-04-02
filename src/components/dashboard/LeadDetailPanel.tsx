@@ -2,19 +2,14 @@
 
 import React, { useEffect, useState } from 'react'
 import { Lead, STAGES, StageLog, Role } from '@/types'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/api/supabase/client'
 import { 
   X, Clock, CheckCircle2, FileText, ChevronRight, Layers, 
   Zap, Phone, Mail, Building2, User, Tag, AlertTriangle, Paperclip,
   Globe, Smartphone, Hash, Database, FlaskConical, Package
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '@/utils/cn'
 
 // Full access: Owner, Admin, Sales Manager
 const FULL_ACCESS_ROLES: Role[] = ['OWNER', 'ADMIN', 'SALES_MANAGER']
@@ -108,7 +103,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
         <div className="pr-12">
           <div className="flex items-center gap-2 mb-3">
               <span className="px-2.5 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-black uppercase tracking-widest border border-blue-500/30 rounded-lg">
-                  {lead.lead_code}
+                  LD-{lead.lead_id}
               </span>
               <span className={cn("px-2.5 py-1 text-[10px] font-black uppercase tracking-widest border rounded-lg",
                 lead.status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-slate-500/20 text-slate-400 border-slate-500/30'
@@ -125,7 +120,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                 {canSeeCompany ? (lead.company_name || '—') : '******'}
                 <span className="text-slate-700">·</span>
                 <ChevronRight size={13} className="text-slate-500" />
-                <span className="capitalize">{lead.role_category} lead</span>
+                <span className="capitalize">{lead.contact_role_category} lead</span>
               </p>
             </>
           ) : (
@@ -133,7 +128,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
               <h2 className="text-2xl font-black tracking-tight text-slate-300">Lead Details</h2>
               <p className="text-slate-500 text-sm mt-1 capitalize flex items-center gap-2">
                 <Tag size={13} className="text-slate-600" />
-                {lead.role_category} · {lead.priority} priority
+                {lead.contact_role_category} · {lead.priority} priority
               </p>
             </>
           )}
@@ -170,7 +165,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Phone Number</span>
-                    <span className="text-sm font-bold text-slate-800">{lead.client_phone || '—'}</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.phone_number || '—'}</span>
                   </div>
                 </div>
               )}
@@ -182,7 +177,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Email Address</span>
-                    <span className="text-sm font-bold text-slate-800 break-all">{lead.client_email || '—'}</span>
+                    <span className="text-sm font-bold text-slate-800 break-all">{lead.email_address || '—'}</span>
                   </div>
                 </div>
               )}
@@ -194,7 +189,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">WhatsApp Number</span>
-                    <span className="text-sm font-bold text-slate-800">{lead.client_whatsapp || '—'}</span>
+                    <span className="text-sm font-bold text-slate-800">{lead.whatsapp_number || '—'}</span>
                   </div>
                 </div>
               )}
@@ -266,7 +261,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
           <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 bg-white">
             <div className="px-6 py-4">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Contact Role</span>
-              <span className="text-sm font-black text-blue-600 capitalize">{lead.role_category || '—'}</span>
+              <span className="text-sm font-black text-blue-600 capitalize">{lead.contact_role_category || '—'}</span>
             </div>
             <div className="px-6 py-4">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Priority</span>
@@ -289,10 +284,10 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
             <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Brief Attachment</h4>
           </div>
           <div className="p-5 bg-white">
-            {lead.document_url ? (
-              isImage(lead.document_url) ? (
+            {lead.requirement_brief ? (
+              isImage(lead.requirement_brief) ? (
                 <img
-                  src={lead.document_url}
+                  src={lead.requirement_brief}
                   alt="Brief"
                   className="w-full h-56 object-cover rounded-2xl border border-slate-200 shadow-md"
                 />
@@ -303,7 +298,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
                   </div>
                   <div>
                     <span className="text-[10px] font-bold text-slate-400 uppercase block mb-0.5">Attached File</span>
-                    <span className="text-sm font-bold text-slate-800 underline break-all">{lead.document_url}</span>
+                    <span className="text-sm font-bold text-slate-800 underline break-all">{lead.requirement_brief}</span>
                   </div>
                 </div>
               )

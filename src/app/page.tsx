@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import landingHero from '@/assets/images/landing-hero.png'
 import { 
   ArrowRight, 
   CheckCircle2, 
@@ -43,7 +44,7 @@ export default function LandingPage() {
                 {/* Hero Illustration */}
                 <div className="relative z-10 flex flex-col items-center justify-center w-full h-full px-10">
                     <Image
-                        src="/landing-hero.png"
+                        src={landingHero}
                         alt="Sales Analytics Dashboard"
                         width={560}
                         height={480}

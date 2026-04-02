@@ -4,12 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Clock, AlertTriangle, User } from 'lucide-react'
 import { Lead, SLAStatus } from '@/types'
 import { differenceInHours, parseISO, formatDistanceToNow } from 'date-fns'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '@/utils/cn'
 
 export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: string, onClick: () => void }) {
   const [slaStatus, setSlaStatus] = useState<SLAStatus>('on_time')
@@ -75,7 +70,7 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
     >
       <div className="flex justify-between items-start mb-3">
         <span className={cn("text-xs font-bold uppercase tracking-wider transition-colors", headerColorMap[color] || "text-slate-500")}>
-          {lead.lead_code}
+          LD-{lead.lead_id}
         </span>
         <div className={cn(
             "badge px-1.5 py-0.5 rounded flex items-center gap-1",
@@ -87,7 +82,7 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       </div>
 
       <h3 className="font-semibold text-slate-800 line-clamp-2 mb-2 leading-tight">
-        {lead.client_name || "Lead " + lead.lead_code}
+        {lead.client_name || "Lead #" + lead.lead_id}
       </h3>
       
       <p className="text-xs text-slate-500 mb-4 line-clamp-2 italic">

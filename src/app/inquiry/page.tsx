@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/api/supabase/client'
 import { LayoutDashboard, User, Phone, MessageSquare, Upload, Send } from 'lucide-react'
 import { toast } from 'sonner'
 

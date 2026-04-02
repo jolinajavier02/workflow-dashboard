@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/api/supabase/client'
 import { LayoutDashboard, Mail, Lock, ArrowRight } from 'lucide-react'
 import { toast } from 'sonner'
 

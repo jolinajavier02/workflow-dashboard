@@ -15,14 +15,9 @@ import {
   X,
   MessageSquare
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/api/supabase/client'
 import { Role } from '@/types'
-import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
-
-function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
+import { cn } from '@/utils/cn'
 
 const SIDEBAR_ITEMS = [
   { name: 'Pipeline', icon: Layers, href: '/dashboard/pipeline', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER'] },
