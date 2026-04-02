@@ -1,14 +1,22 @@
 import { createClient } from '@/api/supabase/client'
-import { Role } from '@/types'
+import { Role, Profile } from '@/types'
+import { activityService } from './activityService'
 
 const supabase = createClient()
 
 export const authService = {
   async getUserProfile() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-      const role = localStorage.getItem('demo_auth_user_role') as Role
-      const name = localStorage.getItem('demo_auth_user_name')
-      return { role, full_name: name || 'Demo User' }
+      const role = (localStorage.getItem('demo_auth_user_role') || 'ADMIN') as Role
+      const name = localStorage.getItem('demo_auth_user_name') || 'Demo User'
+      return { 
+        user_id: 1, 
+        full_name: name, 
+        email: 'demo@workflow.com',
+        role, 
+        is_active: true, 
+        created_at: new Date().toISOString() 
+      }
     }
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -16,12 +24,13 @@ export const authService = {
 
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('role, full_name')
+      .select('*')
       .eq('id', user.id)
       .single()
     
     if (error) throw error
-    return profile
+    // Map id to user_id for compatibility with type
+    return { ...profile, user_id: profile.id } as Profile
   },
 
   async login(email: string) {
@@ -48,13 +57,28 @@ export const authService = {
 
       localStorage.setItem('demo_auth_user_role', role)
       localStorage.setItem('demo_auth_user_name', name)
+      
+      const profile = { 
+          user_id: 1, 
+          full_name: name, 
+          email: 'demo@workflow.com',
+          role: role as Role, 
+          is_active: true, 
+          created_at: new Date().toISOString() 
+      }
+      await activityService.log(profile, 'Session Started', `User logged in using ${email}`)
+
       return { role, name }
   },
 
   async logout() {
+    const profile = await this.getUserProfile()
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         await supabase.auth.signOut()
     } else {
+        if (profile) {
+            await activityService.log(profile, 'Session Ended', 'User logged out')
+        }
         localStorage.removeItem('demo_auth_user_role')
         localStorage.removeItem('demo_auth_user_name')
     }

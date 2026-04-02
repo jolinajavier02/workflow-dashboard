@@ -84,5 +84,16 @@ export interface Inquiry {
   created_at: string;
 }
 
+export interface ActivityRecord {
+  id: string;
+  user_id: number;
+  user_name: string;
+  user_role: Role;
+  action: string;
+  details: string;
+  lead_id?: string;
+  timestamp: string;
+}
+
 export * from '@/data';
 

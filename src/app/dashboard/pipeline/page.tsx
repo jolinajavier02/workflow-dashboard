@@ -17,8 +17,8 @@ import {
 } from 'lucide-react'
 
 export default function PipelinePage() {
-  const { userRole } = useAuth()
-  const { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever } = useLeads(userRole)
+  const { userRole, userProfile } = useAuth()
+  const { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever } = useLeads(userProfile)
   
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)

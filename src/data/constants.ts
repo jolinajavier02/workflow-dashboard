@@ -4,7 +4,8 @@ import {
   BarChart3, 
   Bell, 
   Settings, 
-  MessageSquare
+  MessageSquare,
+  History
 } from 'lucide-react'
 
 export const SIDEBAR_ITEMS = [
@@ -13,5 +14,6 @@ export const SIDEBAR_ITEMS = [
   { name: 'Sales Tracker', icon: BarChart3, href: '/dashboard/tracker', roles: ['ADMIN', 'SALES_MANAGER', 'OWNER'] },
   { name: 'Inbox', icon: MessageSquare, href: '/dashboard/inquiries', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER'] },
   { name: 'Notifications', icon: Bell, href: '/dashboard/notifications', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER'] },
+  { name: 'My Activity', icon: History, href: '/dashboard/activity', roles: ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER'] },
   { name: 'Admin Panel', icon: Settings, href: '/dashboard/admin', roles: ['ADMIN', 'OWNER'] },
 ] as const;
