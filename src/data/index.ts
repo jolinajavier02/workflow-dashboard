@@ -1,6 +1,10 @@
 export const STAGES = [
   { number: 0, name: 'Lead Received', owner: 'SALES_MANAGER', sla_hours: -1 },
   { number: 1, name: 'Catalog Sent to Client', owner: 'SALES_MANAGER', sla_hours: 2 },
+  { number: 2, name: 'Formulation Sample Brief Submitted', owner: 'SALES_MANAGER', sla_hours: 8 },
+  { number: 2.1, name: 'Formulation Brief Approved', owner: 'RND_MANAGER', sla_hours: 6 },
+  { number: 3, name: 'Packaging Sample Brief Submitted', owner: 'SALES_MANAGER', sla_hours: 8 },
+  { number: 3.1, name: 'Packaging Brief Approved', owner: 'PACKAGING_MANAGER', sla_hours: 6 },
   { number: 4, name: 'Client Intimated on Timeline', owner: 'SALES_MANAGER', sla_hours: -1 },
   { number: 5, name: 'R&D Sample Preparation (In Progress)', owner: 'RND_MANAGER', sla_hours: -1 },
   { number: 6, name: 'Packaging Preparation (In Progress)', owner: 'PACKAGING_MANAGER', sla_hours: -1 },
@@ -23,7 +27,7 @@ export const STAGES = [
 ] as const;
 
 export const STAGE_COLUMNS = [
-  { id: 'new', name: 'New', stages: [0, 1], color: 'slate' },
+  { id: 'new', name: 'New', stages: [0, 1, 2, 2.1, 3, 3.1], color: 'slate' },
   { id: 'production', name: 'In Production', stages: [4, 5, 6, 7, 7.1, 8, 8.1], color: 'amber' },
   { id: 'dispatch', name: 'Dispatch', stages: [9, 9.1, 10, 11, 12, 13], color: 'teal' },
   { id: 'follow-up', name: 'Follow-Up', stages: [14, 15, 16], color: 'rose' },

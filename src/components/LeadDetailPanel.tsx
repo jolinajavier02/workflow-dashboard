@@ -60,6 +60,13 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
               color_status: status,
               current_stage: targetStage
           })
+
+          // Log the action with comment
+          if (userProfile) {
+              const { activityService } = await import('@/services/activityService')
+              await activityService.log(userProfile, `Status Update: ${status}`, comment, lead.id)
+          }
+
           toast.success(`Action stored: Lead status updated to ${status} and moved to appropriate stage.`)
       } catch (e: any) {
           toast.error("Failed to commit action: " + e.message)

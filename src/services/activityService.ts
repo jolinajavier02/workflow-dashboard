@@ -32,5 +32,10 @@ export const activityService = {
     return all.filter((a: ActivityRecord) => 
         (userId && a.user_id === userId) || (role && a.user_role === role)
     )
+  },
+
+  getLeadActivities: async (leadId: string) => {
+    const all = JSON.parse(localStorage.getItem(STORE_KEY) || '[]')
+    return all.filter((a: ActivityRecord) => a.lead_id === leadId)
   }
 }

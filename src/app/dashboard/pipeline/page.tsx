@@ -6,6 +6,7 @@ import LeadCard from '@/components/LeadCard'
 import LeadDetailPanel from '@/components/LeadDetailPanel'
 import CreateLeadModal from '@/components/Lead/CreateLeadModal'
 import LeadHistoryModal from '@/components/Lead/LeadHistoryModal'
+import AdminLeadProfileModal from '@/components/Admin/AdminLeadProfileModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useLeads } from '@/hooks/useLeads'
 import { cn } from '@/utils/cn'
@@ -109,8 +110,14 @@ export default function PipelinePage() {
         onDeleteForever={deleteLeadForever} 
       />
 
-      {/* Slide-over Detailed Panel */}
-      {selectedLeadId && (
+      {/* Role-Based Lead Profile Access */}
+      {selectedLeadId && (userRole === 'ADMIN' || userRole === 'OWNER') ? (
+          <AdminLeadProfileModal 
+            isOpen={true}
+            onClose={() => setSelectedLeadId(null)}
+            lead={activeLeads.find(l => l.id === selectedLeadId)!}
+          />
+      ) : selectedLeadId ? (
           <div className="fixed inset-0 z-[100] flex justify-end">
               <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedLeadId(null)}></div>
               <div className="relative w-full max-w-2xl h-full shadow-2xl">
@@ -121,7 +128,7 @@ export default function PipelinePage() {
                   />
               </div>
           </div>
-      )}
+      ) : null}
     </div>
   )
 }

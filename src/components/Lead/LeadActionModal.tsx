@@ -56,8 +56,8 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
               <CheckCircle2 size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-black tracking-tight">Performance & Approval</h2>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">Take Action on LD-{lead.lead_id}</p>
+              <h2 className="text-2xl font-black tracking-tight">{lead.client_name || 'Lead Profile'}</h2>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">Performance & Approval · Take Action on LD-{lead.lead_id}</p>
             </div>
           </div>
         </div>
