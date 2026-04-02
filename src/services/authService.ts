@@ -82,5 +82,39 @@ export const authService = {
         localStorage.removeItem('demo_auth_user_role')
         localStorage.removeItem('demo_auth_user_name')
     }
+  },
+
+  async getProfiles() {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        return JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+    }
+    const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
+    if (error) throw error
+    return data.map((p: any) => ({ ...p, user_id: p.id })) as Profile[]
+  },
+
+  async createProfile(data: any) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+        const newProfile: Profile = {
+            ...data,
+            user_id: Math.floor(Math.random() * 100000),
+            is_active: true,
+            created_at: new Date().toISOString()
+        }
+        profiles.unshift(newProfile)
+        localStorage.setItem('demo_profiles', JSON.stringify(profiles))
+        
+        const currentUser = await this.getUserProfile()
+        if (currentUser) {
+            await activityService.log(currentUser, 'Create User', `Created account for ${data.full_name} (${data.role})`)
+        }
+        return newProfile
+    }
+    
+    // Non-demo Supabase logic (Admin: Create User)
+    const { data: profile, error } = await supabase.from('profiles').insert([{ ...data, id: Math.random().toString() }]).select().single()
+    if (error) throw error
+    return { ...profile, user_id: profile.id } as Profile
   }
 }
