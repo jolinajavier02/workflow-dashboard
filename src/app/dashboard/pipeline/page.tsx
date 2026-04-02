@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { STAGE_COLUMNS, STAGES, Role } from '@/types'
 import LeadCard from '@/components/LeadCard'
 import LeadDetailPanel from '@/components/LeadDetailPanel'
+import LeadActionModal from '@/components/Lead/LeadActionModal'
 import CreateLeadModal from '@/components/Lead/CreateLeadModal'
 import LeadHistoryModal from '@/components/Lead/LeadHistoryModal'
 import AdminLeadProfileModal from '@/components/Admin/AdminLeadProfileModal'
@@ -118,16 +119,39 @@ export default function PipelinePage() {
             lead={activeLeads.find(l => l.id === selectedLeadId)!}
           />
       ) : selectedLeadId ? (
-          <div className="fixed inset-0 z-[100] flex justify-end">
-              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setSelectedLeadId(null)}></div>
-              <div className="relative w-full max-w-2xl h-full shadow-2xl">
-                  <LeadDetailPanel 
-                    leadId={selectedLeadId} 
-                    onClose={() => setSelectedLeadId(null)}
-                    userRole={userRole}
-                  />
-              </div>
-          </div>
+          <LeadActionModal 
+            isOpen={true}
+            onClose={() => setSelectedLeadId(null)}
+            lead={activeLeads.find(l => l.id === selectedLeadId)!}
+            userProfile={userProfile}
+            onAction={async (status, comment) => {
+                const lead = activeLeads.find(l => l.id === selectedLeadId)!
+                let targetStage = lead.current_stage
+
+                // Mapping Colors to Stages
+                if (status === 'YELLOW') targetStage = 5   // In Progress
+                if (status === 'RED')    targetStage = 16  // Follow Up
+                if (status === 'GREEN')  targetStage = 11  // Dispatch
+                if (status === 'BLUE')   targetStage = 19  // Closing
+                if (status === 'GRAY')   targetStage = 0   // New
+
+                const { leadService } = await import('@/services/leadService')
+                const { activityService } = await import('@/services/activityService')
+                
+                await leadService.updateLead(Number(lead.id), { 
+                    color_status: status,
+                    current_stage: targetStage,
+                    last_viewed_by: userProfile?.full_name,
+                    last_viewed_at: new Date().toISOString()
+                })
+
+                if (userProfile) {
+                    await activityService.log(userProfile, `Status Update: ${status}`, comment, lead.id)
+                }
+
+                fetchLeads() // Refresh list
+            }}
+          />
       ) : null}
     </div>
   )
