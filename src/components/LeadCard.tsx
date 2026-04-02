@@ -72,12 +72,20 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
         <span className={cn("text-xs font-bold uppercase tracking-wider transition-colors", headerColorMap[color] || "text-slate-500")}>
           LD-{lead.lead_id}
         </span>
-        <div className={cn(
-            "badge px-1.5 py-0.5 rounded flex items-center gap-1",
-            slaStatus === 'on_time' ? "badge-green" : slaStatus === 'at_risk' ? "badge-yellow" : "badge-red"
-        )}>
-          {slaStatus === 'breached' ? <AlertTriangle size={12} /> : <Clock size={12} />}
-          <span className="text-[10px] font-bold uppercase">{slaStatus.replace('_', ' ')}</span>
+        <div className="flex items-center gap-2">
+            {lead.color_status && <div className={cn("w-2 h-2 rounded-full",
+                lead.color_status === 'YELLOW' ? 'bg-amber-500' : 
+                lead.color_status === 'RED' ? 'bg-red-500' : 
+                lead.color_status === 'GREEN' ? 'bg-emerald-500' : 
+                lead.color_status === 'BLUE' ? 'bg-blue-500' : 'bg-slate-400'
+            )}></div>}
+            <div className={cn(
+                "badge px-1.5 py-0.5 rounded flex items-center gap-1",
+                slaStatus === 'on_time' ? "badge-green" : slaStatus === 'at_risk' ? "badge-yellow" : "badge-red"
+            )}>
+              {slaStatus === 'breached' ? <AlertTriangle size={12} /> : <Clock size={12} />}
+              <span className="text-[10px] font-bold uppercase">{slaStatus.replace('_', ' ')}</span>
+            </div>
         </div>
       </div>
 

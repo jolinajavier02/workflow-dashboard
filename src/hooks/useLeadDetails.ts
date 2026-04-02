@@ -33,24 +33,24 @@ export function useLeadDetails(leadId: string) {
     fetchLead()
   }, [leadId])
 
-  const updateStage = async (newStage: number) => {
+  const updateLeadData = async (updates: Partial<Lead>) => {
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
           const allLeads = JSON.parse(localStorage.getItem('demo_data_store_leads') || '[]')
           const updated = allLeads.map((l: any) => 
-              l.id === leadId ? { ...l, current_stage: newStage, updated_at: new Date().toISOString() } : l
+              l.id === leadId ? { ...l, ...updates, updated_at: new Date().toISOString() } : l
           )
           localStorage.setItem('demo_data_store_leads', JSON.stringify(updated))
-          setLead(prev => prev ? { ...prev, current_stage: newStage } : null)
+          setLead(prev => prev ? { ...prev, ...updates } : null)
           return
       }
-      await leadService.updateLead(parseInt(leadId), { current_stage: newStage })
-      setLead(prev => prev ? { ...prev, current_stage: newStage } : null)
+      await leadService.updateLead(parseInt(leadId), updates)
+      setLead(prev => prev ? { ...prev, ...updates } : null)
     } catch (err: any) {
-      toast.error("Failed to update stage: " + err.message)
+      toast.error("Update failed: " + err.message)
       throw err
     }
   }
 
-  return { lead, loading, updateStage, refresh: fetchLead }
+  return { lead, loading, updateLeadData, refresh: fetchLead }
 }

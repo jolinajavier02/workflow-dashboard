@@ -35,6 +35,9 @@ export interface Lead {
   id: string; // Used for UI keying/mock compat
   current_stage: number;
   status: 'active' | 'closed' | 'on_hold';
+  color_status?: 'GRAY' | 'YELLOW' | 'RED' | 'GREEN' | 'BLUE';
+  last_viewed_by?: string;
+  last_viewed_at?: string;
   is_trashed?: boolean;
   assigned_account_role?: Role; // Logic compatibility
 }
