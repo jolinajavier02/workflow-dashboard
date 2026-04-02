@@ -66,7 +66,7 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                         {users.map((user) => (
-                            <tr key={user.id} className="hover:bg-slate-50/80 transition-all group">
+                            <tr key={user.user_id} className="hover:bg-slate-50/80 transition-all group">
                                 <td className="px-8 py-6">
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold shadow-sm ring-4 ring-white">

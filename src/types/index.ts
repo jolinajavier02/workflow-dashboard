@@ -29,6 +29,7 @@ export interface Lead {
   requirement_brief?: string;
   created_by: number;
   created_at: string;
+  updated_at: string;
   
   // Frontend UI states (not in DB schema but needed for dashboard)
   id: string; // Used for UI keying/mock compat

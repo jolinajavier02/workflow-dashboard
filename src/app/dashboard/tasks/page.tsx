@@ -35,7 +35,23 @@ export default function TasksPage() {
           if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
               const ownedStageNums = ownedStages as number[]
               const mockTasks: Lead[] = [
-                  { id: 'LD-001', lead_code: 'LD-001', client_name: 'Nexus Corp', requirement_details: 'Sample Formulation', current_stage: 0, status: 'active' as const, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+                  { 
+                      id: 'LD-001', 
+                      lead_id: 1001, 
+                      lead_source: 'Website',
+                      priority: 'medium' as const, 
+                      requirement_details: 'Sample Formulation', 
+                      current_stage: 0, 
+                      status: 'active' as const, 
+                      client_name: 'Nexus Corp',
+                      phone_number: '1234567890',
+                      email_address: 'nexus@example.com',
+                      company_name: 'Nexus Corp',
+                      contact_role_category: 'owner',
+                      created_by: 1,
+                      created_at: new Date().toISOString(), 
+                      updated_at: new Date().toISOString() 
+                  },
               ].filter(t => ownedStageNums.includes(t.current_stage));
               setTasks(mockTasks)
           } else {
@@ -83,7 +99,7 @@ export default function TasksPage() {
                                     <div className="flex items-center gap-2">
                                         <span className="text-[10px] font-bold text-blue-600 tracking-widest uppercase">STAGE {task.current_stage}</span>
                                         <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
-                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{task.lead_code}</span>
+                                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">LD-{task.lead_id}</span>
                                     </div>
                                     <h3 className="font-bold text-slate-900">{stage?.name}</h3>
                                     <p className="text-xs text-slate-500 max-w-lg">{task.requirement_details}</p>

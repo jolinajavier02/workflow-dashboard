@@ -18,8 +18,8 @@ export default function NotificationsPage() {
       
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
           setNotifications([
-              { id: 'n1', lead_id: 'LD-001', target_role: 'SALES_MANAGER', message: 'New Inquiry assigned to you.', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
-              { id: 'n2', lead_id: 'LD-002', target_role: 'SALES_MANAGER', message: 'R&D Manager approved formulation brief.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
+              { id: 'n1', lead_id: 1001, target_role: 'SALES_MANAGER', message: 'New Inquiry assigned to you.', is_read: false, created_at: new Date(Date.now() - 3600000).toISOString() },
+              { id: 'n2', lead_id: 1002, target_role: 'SALES_MANAGER', message: 'R&D Manager approved formulation brief.', is_read: true, created_at: new Date(Date.now() - 86400000).toISOString() },
           ])
           setLoading(false)
           return

@@ -10,7 +10,7 @@ interface HeaderProps {
 
 export default function Header({ toggleSidebar }: HeaderProps) {
   const pathname = usePathname()
-  const title = pathname.split('/').pop()?.replace('-', ' ') || 'Dashboard'
+  const title = pathname?.split('/').pop()?.replace('-', ' ') || 'Dashboard'
 
   return (
     <header className="h-16 border-b border-slate-200 flex items-center justify-between px-8 bg-white z-40">
