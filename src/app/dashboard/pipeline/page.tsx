@@ -118,6 +118,23 @@ export default function PipelinePage() {
             isOpen={true}
             onClose={() => setSelectedLeadId(null)}
             lead={activeLeads.find(l => l.id === selectedLeadId)!}
+            onAction={async (action, comment) => {
+                if (action === 'REPROCESS') {
+                    const leadToUpdate = activeLeads.find(l => l.id === selectedLeadId)!
+                    await updateLead(leadToUpdate.id as any, { 
+                        current_stage: 2, // Reprocess to Briefing (R&D)
+                        last_viewed_by: userProfile?.full_name,
+                        last_viewed_at: new Date().toISOString()
+                    })
+
+                    if (userProfile) {
+                        await activityService.log(userProfile, 'Admin Override (Reprocessed)', comment, leadToUpdate.id)
+                    }
+
+                    setSelectedLeadId(null)
+                    fetchLeads()
+                }
+            }}
           />
       ) : !authLoading && selectedLeadId ? (
           <LeadActionModal 

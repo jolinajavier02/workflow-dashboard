@@ -61,10 +61,23 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
         "{lead.company_name || 'abc'}"
       </p>
 
-      <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-1">
-         <div className="flex items-center gap-1 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-            <Clock size={10} className="text-slate-300" />
-            <span>Updated: {formattedTime}</span>
+      <div className="flex flex-col gap-2 pt-3 border-t border-slate-50 mt-1">
+         <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-1.5 text-[9px] font-black">
+                {(() => {
+                    if (lead.current_stage < 2) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-widest">R&D</span></>;
+                    if (lead.current_stage >= 2 && lead.current_stage < 4) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-widest">Packaging</span></>;
+                    if (lead.current_stage >= 4 && lead.current_stage < 9) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-widest">Sales</span></>;
+                    if (lead.current_stage >= 9 && lead.current_stage < 14) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">Project Manager</span></>;
+                    if (lead.current_stage >= 14 && lead.current_stage <= 16) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded uppercase tracking-widest">Admin</span></>;
+                    if (lead.current_stage >= 17) return <span className="text-blue-600 font-bold uppercase tracking-widest underline decoration-2 underline-offset-2">Completed</span>;
+                    return null;
+                })()}
+            </div>
+            <div className="flex items-center gap-1 text-[9px] font-black text-slate-300 uppercase tracking-widest shrink-0">
+                <Clock size={10} />
+                <span>{formattedTime}</span>
+            </div>
          </div>
       </div>
       

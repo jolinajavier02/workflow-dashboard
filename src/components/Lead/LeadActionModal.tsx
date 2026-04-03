@@ -43,6 +43,15 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
 
   const isPM = userProfile?.role === 'PROJECT_MANAGER'
 
+  const isRnDNode = userProfile?.role === 'RND_MANAGER' && lead.current_stage < 2;
+  const isPackagingNode = userProfile?.role === 'PACKAGING_MANAGER' && lead.current_stage >= 2 && lead.current_stage < 4;
+  const isSalesNode = (userProfile?.role === 'SALES_MANAGER' || userProfile?.role === 'SALES_EXECUTIVE') && lead.current_stage >= 4 && lead.current_stage < 9;
+  const isPMNode = userProfile?.role === 'PROJECT_MANAGER' && lead.current_stage >= 9 && lead.current_stage < 14;
+
+  const isMyTurn = isRnDNode || isPackagingNode || isSalesNode || isPMNode;
+  const isCompleted = lead.current_stage >= 17;
+  const isFollowUp = lead.current_stage >= 14 && lead.current_stage <= 16;
+
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}></div>
@@ -108,20 +117,30 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
               {/* Comment Field (Required) */}
               <div className="space-y-3 flex-1 mb-6">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Mandatory Operational Remark *</label>
-                <div className="relative h-[calc(100%-2rem)]">
+                <div className={cn("relative h-[calc(100%-2rem)]", !isMyTurn ? "opacity-60" : "")}>
                     <MessageSquare className="absolute left-5 top-5 text-slate-400" size={18} />
                     <textarea 
                         value={comment}
+                        disabled={!isMyTurn}
                         onChange={(e) => setComment(e.target.value)}
-                        placeholder="Enter finalize remarks to advance pipeline..."
-                        className="w-full h-full min-h-[200px] pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm text-slate-800 resize-none"
+                        placeholder={isMyTurn ? "Enter finalize remarks to advance pipeline..." : "Action locked: Awaiting previous stage operations"}
+                        className="w-full h-full min-h-[200px] pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm text-slate-800 resize-none disabled:bg-slate-50 disabled:cursor-not-allowed"
                     />
                 </div>
               </div>
 
               {/* Role-Based Action Buttons */}
               <div className="shrink-0">
-                {isPM ? (
+                {!isMyTurn ? (
+                   <button 
+                    type="button"
+                    disabled
+                    className="w-full bg-slate-200 text-slate-400 font-black py-6 rounded-[28px] shadow-sm flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-[10px] cursor-not-allowed"
+                   >
+                     <AlertCircle size={18} />
+                     {isCompleted ? "Pipeline Closed" : isFollowUp ? "Yielding to Admin Correction" : "Awaiting Execution Turn"}
+                   </button>
+                ) : isPM ? (
                    <div className="grid grid-cols-2 gap-4">
                       <button 
                         type="button"
@@ -157,13 +176,15 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
 
         <div className="px-10 py-5 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
             <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse shadow-lg shadow-emerald-200"></div>
+                <div className={cn("w-2 h-2 rounded-full shadow-lg", isMyTurn ? "bg-emerald-500 animate-pulse shadow-emerald-200" : "bg-amber-500 shadow-amber-200")}></div>
                 <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Account: {userProfile?.role?.replace('_', ' ')}</span>
             </div>
-            <div className="flex items-center gap-2 opacity-40">
-                <AlertCircle size={14} className="text-slate-400" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter italic">Submission is irreversible</span>
-            </div>
+            {isMyTurn && (
+                <div className="flex items-center gap-2 opacity-40">
+                    <AlertCircle size={14} className="text-slate-400" />
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter italic">Submission is irreversible</span>
+                </div>
+            )}
         </div>
 
       </div>

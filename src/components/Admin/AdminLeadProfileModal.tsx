@@ -7,7 +7,8 @@ import {
   Building2 as BuildingIcon, Package as PackageIcon, 
   Paperclip as PaperclipIcon, FlaskConical as FlaskIcon, 
   Clock as ClockIcon, MessageSquare as MsgIcon,
-  User as UserIcon, Phone as PhoneIcon, Mail as MailIcon
+  User as UserIcon, Phone as PhoneIcon, Mail as MailIcon,
+  AlertTriangle as AlertTriangleIcon, RotateCcw as RotateCcwIcon
 } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
@@ -17,9 +18,10 @@ interface AdminLeadProfileModalProps {
   isOpen: boolean
   onClose: () => void
   lead: Lead
+  onAction?: (action: string, comment: string) => void
 }
 
-export default function AdminLeadProfileModal({ isOpen, onClose, lead }: AdminLeadProfileModalProps) {
+export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction }: AdminLeadProfileModalProps) {
   const [activities, setActivities] = useState<ActivityRecord[]>([])
 
   useEffect(() => {
@@ -250,7 +252,7 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead }: AdminLe
                         isImage(lead.requirement_brief) ? (
                             <img src={lead.requirement_brief} alt="Visual Monitor" className="w-full h-full object-cover" />
                         ) : (
-                            <div className="flex flex-col items-center gap-6 text-center italic">
+                            <div className="flex flex-col items-center gap-6 text-center italic p-4">
                                 <div className="w-24 h-24 bg-white rounded-[40px] flex items-center justify-center text-blue-600 shadow-2xl"><PaperclipIcon size={32} /></div>
                                 <p className="text-lg font-black text-slate-900 underline decoration-blue-500 decoration-4 underline-offset-4 break-all">{lead.requirement_brief}</p>
                             </div>
@@ -263,6 +265,27 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead }: AdminLe
                     )}
                 </div>
             </div>
+
+            {/* Admin Override Action (Only visible in Follow-Up loop) */}
+            {lead.current_stage >= 14 && lead.current_stage <= 16 && onAction && (
+                <div className="mt-8 bg-rose-50 border border-rose-200 p-8 rounded-[32px] flex items-center justify-between">
+                    <div>
+                        <h3 className="text-rose-900 font-black text-xl mb-1 flex items-center gap-2"><AlertTriangleIcon size={20} /> System Corrective Action</h3>
+                        <p className="text-rose-700 text-xs font-bold w-[400px]">Lead was rejected by PM. Only Admins can reprocess the ticket back into the active production pipeline.</p>
+                    </div>
+                    <button 
+                        onClick={() => {
+                            if(window.confirm('Are you sure you want to reprocess this ticket back into the R&D Queue?')) {
+                                onAction('REPROCESS', 'Admin corrected ticket issues. Manually resubmitting into R&D for rework.');
+                            }
+                        }}
+                        className="bg-slate-900 hover:bg-black text-white px-8 py-4 rounded-full font-black text-[11px] uppercase tracking-widest shadow-xl flex items-center gap-3 transition-colors"
+                    >
+                        <RotateCcwIcon size={16} />
+                        Reprocess Lead to R&D
+                    </button>
+                </div>
+            )}
          </div>
       </div>
     </div>
