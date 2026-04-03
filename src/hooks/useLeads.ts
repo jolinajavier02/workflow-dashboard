@@ -51,18 +51,22 @@ export function useLeads(userProfile: Profile | null) {
 
   const createLead = async (leadForm: any) => {
     try {
+      const finalLeadData = {
+          ...leadForm,
+          lead_id: leadForm.lead_id || Math.floor(Math.random() * 10000),
+          current_stage: 0,
+          status: 'active' as const,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          is_trashed: false,
+          created_by: userProfile?.user_id || 1,
+          assigned_account_role: userRole
+      }
+
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
           const newMockLead = {
               id: Math.random().toString(),
-              lead_id: Math.floor(Math.random()*10000),
-              ...leadForm,
-              current_stage: 0,
-              status: 'active',
-              created_by: userProfile?.user_id || 1,
-              assigned_account_role: userRole,
-              is_trashed: false,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+              ...finalLeadData
           } as Lead
           
           const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
@@ -71,29 +75,28 @@ export function useLeads(userProfile: Profile | null) {
           saveLeadsToStorage(updated)
           
           if (userProfile) {
-            await activityService.log(userProfile, 'Create Lead', `Created lead for ${newMockLead.client_name}`, newMockLead.id)
-            // Notify Admins, Owner, and Sales
-            await notificationService.notifyAdmins('New Lead Registered', `A new lead for ${newMockLead.client_name} (${newMockLead.company_name}) has entered the system.`, 'LEAD')
-            await notificationService.notifyRole('SALES_MANAGER', 'Lead Created', `New lead generated for ${newMockLead.client_name}.`, 'SUCCESS')
-            // Notify R&D specifically for approval
-            await notificationService.notifyRole('RND_MANAGER', 'Action Required: Lead Briefing', `New lead LD-${newMockLead.lead_id} is awaiting your R&D briefing and approval.`, 'WARNING')
+            await activityService.log(userProfile, 'Enrolled Lead', `Manual ID ${newMockLead.lead_id} registered for ${newMockLead.client_name}`, newMockLead.id)
+            await notificationService.notifyAdmins('Lead Enrolled', `New lead LD-${newMockLead.lead_id} for ${newMockLead.client_name} is now in the pipeline.`, 'LEAD')
+            await notificationService.notifyRole('RND_MANAGER', 'New Assignment', `Lead LD-${newMockLead.lead_id} is awaiting technical briefing.`, 'WARNING')
           }
 
           fetchLeads()
+          toast.success('Lead Enrolled (Sandbox)')
           return newMockLead
       }
       
-      const insertData = { ...leadForm, lead_id: Math.floor(Math.random()*10000) }
-      const newLead = await leadService.createLead(insertData)
+      const newLead = await leadService.createLead(finalLeadData)
       
       if (userProfile) {
-          await activityService.log(userProfile, 'Create Lead', `Created lead for ${insertData.client_name}`)
+          await activityService.log(userProfile, 'Enrolled Lead', `Registered global lead LD-${newLead.lead_id} for ${newLead.client_name}`)
+          await notificationService.notifyAdmins('Global Lead Enrolled', `New cloud lead LD-${newLead.lead_id} entered from ${userProfile.full_name}`, 'LEAD')
       }
 
       fetchLeads()
+      toast.success('Lead Registered Globally')
       return newLead
     } catch (err: any) {
-      toast.error("Create failed: " + err.message)
+      toast.error("Enrollment failed: " + err.message)
       throw err
     }
   }
