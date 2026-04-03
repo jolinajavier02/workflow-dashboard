@@ -134,8 +134,12 @@ export default function PipelinePage() {
                 } else if (status === 'PM_CLOSING') {
                     targetStage = 17 // Move to Closing
                 } else {
-                    // NEW -> PRODUCTION
-                    if (lead.current_stage <= 3.1) {
+                    // NEW -> BRIEFING
+                    if (lead.current_stage <= 1.9) {
+                        targetStage = 2 
+                    }
+                    // BRIEFING -> PRODUCTION
+                    else if (lead.current_stage >= 2 && lead.current_stage <= 3.1) {
                         targetStage = 4 
                     }
                     // PRODUCTION -> DISPATCH
