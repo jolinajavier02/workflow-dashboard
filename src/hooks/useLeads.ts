@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Lead, Role, Profile } from '@/types'
 import { leadService } from '@/services/leadService'
 import { activityService } from '@/services/activityService'
+import { notificationService } from '@/services/notificationService'
 import { toast } from 'sonner'
 
 export function useLeads(userProfile: Profile | null) {
@@ -71,6 +72,11 @@ export function useLeads(userProfile: Profile | null) {
           
           if (userProfile) {
             await activityService.log(userProfile, 'Create Lead', `Created lead for ${newMockLead.client_name}`, newMockLead.id)
+            // Notify Admins, Owner, and Sales
+            await notificationService.notifyAdmins('New Lead Registered', `A new lead for ${newMockLead.client_name} (${newMockLead.company_name}) has entered the system.`, 'LEAD')
+            await notificationService.notifyRole('SALES_MANAGER', 'Lead Created', `New lead generated for ${newMockLead.client_name}.`, 'SUCCESS')
+            // Notify R&D specifically for approval
+            await notificationService.notifyRole('RND_MANAGER', 'Action Required: Lead Briefing', `New lead LD-${newMockLead.lead_id} is awaiting your R&D briefing and approval.`, 'WARNING')
           }
 
           fetchLeads()

@@ -11,6 +11,7 @@ import AdminLeadProfileModal from '@/components/Admin/AdminLeadProfileModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useLeads } from '@/hooks/useLeads'
 import { activityService } from '@/services/activityService'
+import { notificationService } from '@/services/notificationService'
 import { cn } from '@/utils/cn'
 import { 
   Plus, 
@@ -175,12 +176,29 @@ export default function PipelinePage() {
                 })
 
                 if (userProfile) {
+                    const stageName = STAGES.find(s => s.number === targetStage)?.name || `Stage ${targetStage}`
                     await activityService.log(
                         userProfile, 
                         status === 'PM_FOLLOW_UP' ? 'Sent to Follow-Up' : status === 'PM_CLOSING' ? 'Sent to Closing' : `Shifted to Stage ${targetStage}`, 
                         comment, 
                         lead.id
                     )
+
+                    // General notification of movement
+                    await notificationService.notifyAdmins('Lead Transmitted', `Lead LD-${lead.lead_id} moved to ${stageName} by ${userProfile.full_name}`, 'INFO')
+
+                    // Next Role Assignment Notifications
+                    if (status === 'PM_FOLLOW_UP') {
+                        await notificationService.notifyAdmins('ACTION REQUIRED: Follow-Up', `Project Manager flagged Lead LD-${lead.lead_id} for mandatory follow-up.`, 'ERROR')
+                    } else {
+                        if (userProfile.role === 'RND_MANAGER') {
+                            await notificationService.notifyRole('PACKAGING_MANAGER', 'Lead Assigned', `Lead LD-${lead.lead_id} has been approved by R&D and assigned to your Packaging team.`, 'WARNING')
+                        } else if (userProfile.role === 'PACKAGING_MANAGER') {
+                            await notificationService.notifyRole('SALES_MANAGER', 'Lead Ready', `Lead LD-${lead.lead_id} packaging completed. Ready for Sales processing.`, 'SUCCESS')
+                        } else if (userProfile.role === 'SALES_MANAGER' || userProfile.role === 'SALES_EXECUTIVE') {
+                            await notificationService.notifyRole('PROJECT_MANAGER', 'Project Received', `Lead LD-${lead.lead_id} dispatched to Project Management.`, 'INFO')
+                        }
+                    }
                 }
 
                 setSelectedLeadId(null)

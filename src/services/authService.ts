@@ -1,6 +1,7 @@
 import { createClient } from '@/api/supabase/client'
 import { Role, Profile } from '@/types'
 import { activityService } from './activityService'
+import { notificationService } from './notificationService'
 
 const supabase = createClient()
 
@@ -114,6 +115,10 @@ export const authService = {
         const currentUser = await this.getUserProfile()
         if (currentUser) {
             await activityService.log(currentUser, 'Create User', `Created account for ${data.full_name} (${data.role})`)
+            // Broadcast to Admin/Owner
+            await notificationService.notifyAdmins('New User Created', `Account for ${data.full_name} has been successfully provisioned with role: ${data.role}`, 'SUCCESS')
+            // Notify new user
+            await notificationService.notifyUser(newProfile.user_id, 'Welcome to SalesFlow', `Your ${data.role} account has been created by the System Administrator.`, 'INFO')
         }
         return newProfile
     }
@@ -134,12 +139,14 @@ export const authService = {
             
             const currentUser = await this.getUserProfile()
             if (currentUser) {
-                const action = value ? `Recover/Unblock: ${field}` : `Delete/Block: ${field}`
+                const action = value ? `Recovered/Unblocked` : `Restricted/Deleted`
                 await activityService.log(
                     currentUser, 
                     'Security Override', 
                     `Admin explicitly changed ${field} to ${value} for ${profiles[idx].full_name}`
                 )
+                // Notify user specifically
+                await notificationService.notifyUser(userId, 'Security Alert', `Your account is now ${action} by an Administrator.`, 'WARNING')
             }
         }
         return
@@ -158,6 +165,7 @@ export const authService = {
             localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
             const profile = profiles[idx]
             await activityService.log(profile, 'Security Update', 'User modified their account password')
+            await notificationService.notifyUser(userId, 'Security Update', 'Your account password has been successfully modified.', 'SUCCESS')
         }
         return
     }
