@@ -33,7 +33,16 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'slate': 'bg-slate-400',
   }
 
-  const formattedTime = lead.last_viewed_at ? format(parseISO(lead.last_viewed_at), 'HH:mm') : '--:--'
+  const formattedTime = lead.last_viewed_at ? format(parseISO(lead.last_viewed_at), 'MM/dd/yy HH:mm') : '--/--/-- --:--'
+
+  let displayStage = 1;
+  const stageVal = lead.current_stage;
+  if (stageVal < 2) displayStage = 1;
+  else if (stageVal >= 2 && stageVal < 4) displayStage = 2;
+  else if (stageVal >= 4 && stageVal < 9) displayStage = 3;
+  else if (stageVal >= 9 && stageVal < 14) displayStage = 4;
+  else if (stageVal >= 17) displayStage = 5;
+  else if (stageVal >= 14 && stageVal <= 16) displayStage = 6;
 
   return (
     <div 
@@ -44,12 +53,19 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
         )}
     >
       <div className="flex justify-between items-start mb-3">
-        <div className="px-2 py-0.5 bg-slate-900 rounded text-[10px] font-black text-white tracking-widest leading-none">
+        <div className="px-2 py-0.5 bg-slate-900 rounded text-[10px] font-black text-white tracking-widest leading-none flex items-center">
           LD-{lead.lead_id}
         </div>
-        <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded border border-slate-100">
-           <User size={10} className="text-slate-400" />
-           <span className="text-[10px] font-black text-slate-800">{lead.current_stage}</span>
+        <div className="flex items-center gap-1.5 text-[9px] font-black">
+                {(() => {
+                    if (stageVal < 2) return <span className="text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase tracking-widest border border-indigo-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">Assigned: R&D</span>;
+                    if (stageVal >= 2 && stageVal < 4) return <span className="text-amber-600 bg-amber-50 px-2 py-1 rounded uppercase tracking-widest border border-amber-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">Assigned: Packaging</span>;
+                    if (stageVal >= 4 && stageVal < 9) return <span className="text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">Assigned: Sales</span>;
+                    if (stageVal >= 9 && stageVal < 14) return <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-widest border border-blue-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">Assigned: Proj Manager</span>;
+                    if (stageVal >= 14 && stageVal <= 16) return <span className="text-rose-600 bg-rose-50 px-2 py-1 rounded uppercase tracking-widest border border-rose-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]">Assigned: Admin</span>;
+                    if (stageVal >= 17) return <span className="text-slate-500 bg-slate-100 px-2 py-1 rounded uppercase tracking-widest border border-slate-200 shadow-[inset_0_1px_4px_rgba(0,0,0,0.03)] focus:outline-none focus:ring-0 select-none">Completed</span>;
+                    return null;
+                })()}
         </div>
       </div>
 
@@ -57,27 +73,18 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
         {lead.client_name || "Lead #" + lead.lead_id}
       </h3>
       
-      <p className="text-[10px] font-bold text-slate-400 mb-3 line-clamp-1 leading-relaxed italic">
+      <p className="text-[10px] font-bold text-slate-400 mb-4 line-clamp-1 leading-relaxed italic">
         "{lead.company_name || 'abc'}"
       </p>
 
-      <div className="flex flex-col gap-2 pt-3 border-t border-slate-50 mt-1">
-         <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-1.5 text-[9px] font-black">
-                {(() => {
-                    if (lead.current_stage < 2) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded uppercase tracking-widest">R&D</span></>;
-                    if (lead.current_stage >= 2 && lead.current_stage < 4) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-amber-600 bg-amber-50 px-2 py-0.5 rounded uppercase tracking-widest">Packaging</span></>;
-                    if (lead.current_stage >= 4 && lead.current_stage < 9) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded uppercase tracking-widest">Sales</span></>;
-                    if (lead.current_stage >= 9 && lead.current_stage < 14) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded uppercase tracking-widest">Project Manager</span></>;
-                    if (lead.current_stage >= 14 && lead.current_stage <= 16) return <><span className="text-slate-400">ASSIGNED:</span> <span className="text-rose-600 bg-rose-50 px-2 py-0.5 rounded uppercase tracking-widest">Admin</span></>;
-                    if (lead.current_stage >= 17) return <span className="text-blue-600 font-bold uppercase tracking-widest underline decoration-2 underline-offset-2">Completed</span>;
-                    return null;
-                })()}
-            </div>
-            <div className="flex items-center gap-1 text-[9px] font-black text-slate-300 uppercase tracking-widest shrink-0">
-                <Clock size={10} />
-                <span>{formattedTime}</span>
-            </div>
+      <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-1">
+         <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <Clock size={10} className="text-slate-300" />
+            <span>{formattedTime}</span>
+         </div>
+         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded border border-slate-100">
+            <User size={10} className="text-slate-400" />
+            <span className="text-[10px] font-black text-slate-800">Stage {displayStage}</span>
          </div>
       </div>
       
