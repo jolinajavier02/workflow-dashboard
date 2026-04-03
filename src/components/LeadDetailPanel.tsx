@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { STAGES, Role, Lead } from '@/types'
+import { activityService } from '@/services/activityService'
 import { 
   X, Clock, CheckCircle2, Paperclip, AlertTriangle, 
   User, Phone, Mail, Hash, Building2, Tag, Info,
@@ -62,9 +63,9 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
           })
 
           // Log the action with comment
-          if (userProfile) {
-              const { activityService } = await import('@/services/activityService')
-              await activityService.log(userProfile, `Status Update: ${status}`, comment, lead.id)
+          if (userProfile) {              // Removed vulnerable dynamic import
+              await activityService.log(
+userProfile, `Status Update: ${status}`, comment, lead.id)
           }
 
           toast.success(`Action stored: Lead status updated to ${status} and moved to appropriate stage.`)

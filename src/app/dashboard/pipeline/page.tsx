@@ -10,6 +10,7 @@ import LeadHistoryModal from '@/components/Lead/LeadHistoryModal'
 import AdminLeadProfileModal from '@/components/Admin/AdminLeadProfileModal'
 import { useAuth } from '@/hooks/useAuth'
 import { useLeads } from '@/hooks/useLeads'
+import { activityService } from '@/services/activityService'
 import { cn } from '@/utils/cn'
 import { 
   Plus, 
@@ -148,7 +149,7 @@ export default function PipelinePage() {
                     }
                 }
 
-                const { activityService } = await import('@/services/activityService')
+                // activityService is now securely imported statically
                 
                 await updateLead(lead.id as any, { 
                     current_stage: targetStage,
