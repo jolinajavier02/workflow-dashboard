@@ -20,7 +20,7 @@ export function useLeads(userProfile: Profile | null) {
         const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
         
         const accountLeads = allStoredLeads.filter((l: any) => {
-            if (['OWNER', 'RND_MANAGER', 'PROJECT_MANAGER', 'PACKAGING_MANAGER'].includes(userRole)) return true;
+            if (['ADMIN', 'OWNER', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PROJECT_MANAGER', 'PACKAGING_MANAGER'].includes(userRole)) return true;
             return l.assigned_account_role === userRole;
         })
         
