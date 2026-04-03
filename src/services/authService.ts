@@ -147,5 +147,20 @@ export const authService = {
 
     const { error } = await supabase.from('profiles').update({ [field]: value }).eq('id', userId)
     if (error) throw error
+  },
+
+  async updatePassword(userId: string | number, newPassword: string) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
+        const idx = profiles.findIndex((p: any) => p.user_id === userId)
+        if (idx > -1) {
+            profiles[idx].password_hash = newPassword;
+            localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
+            const profile = profiles[idx]
+            await activityService.log(profile, 'Security Update', 'User modified their account password')
+        }
+        return
+    }
+    // Production supabase logic should go here...
   }
 }
