@@ -34,11 +34,11 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
     setIsSubmitting(true)
     try {
       // Merge lead_id_input if provided, otherwise logic in useLeads handles it
-      const result = await onSubmit({
+      await onSubmit({
           ...formData,
           lead_id: formData.lead_id_input || Math.floor(Math.random()*10000).toString()
       })
-      setCreatedLead(result)
+      handleResetAndClose()
     } finally {
       setIsSubmitting(false)
     }
@@ -64,37 +64,8 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" onClick={handleResetAndClose}></div>
       <div className="relative bg-white rounded-[48px] w-full max-w-5xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden animate-in zoom-in-95 duration-300">
           
-          {createdLead ? (
-              <div className="flex flex-col items-center justify-center p-20 text-center space-y-8 animate-in fade-in slide-in-from-bottom-10 duration-500">
-                  <div className="w-32 h-32 bg-emerald-50 rounded-[48px] flex items-center justify-center text-emerald-500 shadow-2xl shadow-emerald-100 border border-emerald-100">
-                      <CheckCircle2 size={64} />
-                  </div>
-                  <div>
-                      <h2 className="text-4xl font-black text-slate-900 tracking-tight">Lead Successfully Created</h2>
-                      <p className="text-slate-500 font-bold mt-2 uppercase tracking-widest text-xs">New Pipeline Entry Logged</p>
-                  </div>
-
-                  <div className="w-full max-w-md bg-slate-50 rounded-[32px] border border-slate-100 p-8 space-y-6">
-                      <div className="flex flex-col items-center gap-2">
-                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Lead Identity</span>
-                          <div className="px-6 py-2 bg-slate-900 rounded-2xl flex items-center gap-4 group cursor-pointer active:scale-95 transition-all">
-                              <span className="text-2xl font-black text-white tracking-widest leading-none italic">LD-{createdLead.lead_id}</span>
-                              <Clipboard size={18} className="text-slate-500 group-hover:text-white" />
-                          </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 text-left">
-                          <div className="p-4 bg-white rounded-2xl border border-slate-100">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Company</span>
-                              <p className="text-sm font-black text-slate-800 truncate">{createdLead.company_name}</p>
-                          </div>
-                          <div className="p-4 bg-white rounded-2xl border border-slate-100">
-                              <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest block mb-1">Client</span>
-                              <p className="text-sm font-black text-slate-800 truncate">{createdLead.client_name}</p>
-                          </div>
-                      </div>
-                  </div>
-                  <button onClick={handleResetAndClose} className="px-12 py-5 bg-slate-900 text-white font-black rounded-3xl hover:bg-black transition-all shadow-2xl uppercase tracking-widest text-xs">Done</button>
-              </div>
+          {false ? (
+              <div></div>
           ) : (
               <>
                 <div className="flex items-center justify-between px-10 py-8 border-b border-slate-50 bg-slate-50/50">
