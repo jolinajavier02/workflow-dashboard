@@ -128,27 +128,23 @@ export default function PipelinePage() {
                 const lead = activeLeads.find(l => l.id === selectedLeadId)!
                 let targetStage = lead.current_stage
 
-                // Functional Stage Progression 
+                // Functional Stage Progression via Role Mapping
                 if (status === 'PM_FOLLOW_UP') {
                     targetStage = 14 // Move to Follow-Up
                 } else if (status === 'PM_CLOSING') {
                     targetStage = 17 // Move to Closing
                 } else {
-                    // NEW -> BRIEFING
-                    if (lead.current_stage <= 1.9) {
+                    // R&D -> BRIEFING
+                    if (userProfile?.role === 'RND_MANAGER') {
                         targetStage = 2 
                     }
-                    // BRIEFING -> PRODUCTION
-                    else if (lead.current_stage >= 2 && lead.current_stage <= 3.1) {
+                    // PACKAGING -> PRODUCTION
+                    else if (userProfile?.role === 'PACKAGING_MANAGER') {
                         targetStage = 4 
                     }
-                    // PRODUCTION -> DISPATCH
-                    else if (lead.current_stage >= 4 && lead.current_stage <= 8.1) {
+                    // SALES -> DISPATCH
+                    else if (userProfile?.role === 'SALES_MANAGER' || userProfile?.role === 'SALES_EXECUTIVE') {
                         targetStage = 9
-                    }
-                    // DISPATCH -> FOLLOW-UP
-                    else if (lead.current_stage >= 9 && lead.current_stage <= 13) {
-                        targetStage = 14
                     }
                 }
 
