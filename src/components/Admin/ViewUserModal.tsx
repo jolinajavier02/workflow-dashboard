@@ -81,14 +81,7 @@ export default function ViewUserModal({ isOpen, onClose, user }: ViewUserModalPr
                  </div>
               </div>
 
-              {/* Field 5: profile_picture */}
-              <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-start gap-4">
-                 <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><UserCircle2 size={16}/></div>
-                 <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">profile_picture</label>
-                    <span className="text-xs font-bold text-slate-500 italic line-clamp-1">{user.profile_picture ? 'URL Link Active [HIDDEN]' : 'NULL'}</span>
-                 </div>
-              </div>
+
 
               {/* Field 6: password_hash */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-start gap-4">

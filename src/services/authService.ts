@@ -86,16 +86,17 @@ export const authService = {
 
   async getProfiles() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        const stored = localStorage.getItem('demo_profiles')
+        const stored = localStorage.getItem('demo_profiles_v2')
         if (stored) return JSON.parse(stored);
         
         const defaultProfiles = [
-            { user_id: 'rnd-1', full_name: 'Dr. RND User', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pkg-1', full_name: 'Pack Manager', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'sls-1', full_name: 'Sales Executive', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pm-1', full_name: 'Lead PM', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
+            { user_id: 'adm-1', full_name: 'ADMIN', email: 'admin@workflow.com', phone_number: '+1 555-0000', role: 'ADMIN', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'rnd-1', full_name: 'R&D', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pkg-1', full_name: 'PACKAGING', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'sls-1', full_name: 'SALES', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pm-1', full_name: 'PROJECT MANAGER', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
         ];
-        localStorage.setItem('demo_profiles', JSON.stringify(defaultProfiles));
+        localStorage.setItem('demo_profiles_v2', JSON.stringify(defaultProfiles));
         return defaultProfiles;
     }
     const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
@@ -105,7 +106,7 @@ export const authService = {
 
   async createProfile(data: any) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        const profiles = JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
         const newProfile: Profile = {
             ...data,
             user_id: Math.floor(Math.random() * 100000),
@@ -113,7 +114,7 @@ export const authService = {
             created_at: new Date().toISOString()
         }
         profiles.unshift(newProfile)
-        localStorage.setItem('demo_profiles', JSON.stringify(profiles))
+        localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
         
         const currentUser = await this.getUserProfile()
         if (currentUser) {
@@ -130,11 +131,11 @@ export const authService = {
 
   async updateProfileStatus(userId: string | number, isActive: boolean) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        const profiles = JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
         const idx = profiles.findIndex((p: any) => p.user_id === userId)
         if (idx > -1) {
             profiles[idx].is_active = isActive
-            localStorage.setItem('demo_profiles', JSON.stringify(profiles))
+            localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
             
             const currentUser = await this.getUserProfile()
             if (currentUser) {

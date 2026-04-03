@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Profile } from '@/types'
 import { authService } from '@/services/authService'
 import { toast } from 'sonner'
-import { Shield, Edit2, Trash2, UserPlus, Filter, Search, RotateCcw, Eye } from 'lucide-react'
+import { Shield, Edit2, Trash2, UserPlus, Filter, Search, RotateCcw, Eye, MoreHorizontal, Ban, Lock, Unlock } from 'lucide-react'
 import CreateUserModal from '@/components/CreateUserModal'
 import ViewUserModal from '@/components/Admin/ViewUserModal'
 
@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
+  const [openDropdownId, setOpenDropdownId] = useState<string | number | null>(null)
   const [filterType, setFilterType] = useState<'ACTIVE' | 'DELETED'>('ACTIVE')
 
   const fetchUsers = async () => {
@@ -29,6 +30,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchUsers()
+    const closeDropdown = () => setOpenDropdownId(null)
+    window.addEventListener('click', closeDropdown)
+    return () => window.removeEventListener('click', closeDropdown)
   }, [])
 
   const handleCreateUser = async (formData: any) => {
@@ -136,21 +140,29 @@ export default function AdminPage() {
                                     <span className="text-xs font-medium text-slate-500">{user.email}</span>
                                 </td>
                                 <td className="px-8 py-6 text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0 translate-x-1">
-                                        <button onClick={(e) => { e.stopPropagation(); setSelectedUser(user) }} className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-slate-200 rounded-xl transition-all shadow-sm" title="View Profile">
-                                            <Eye size={16} />
+                                    <div className="relative inline-block text-left opacity-0 group-hover:opacity-100 transition-all">
+                                        <button onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === user.user_id ? null : user.user_id) }} className="p-2 text-slate-400 hover:text-slate-900 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg transition-all shadow-sm">
+                                            <MoreHorizontal size={16} />
                                         </button>
-                                        <button onClick={(e) => { e.stopPropagation(); }} className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all shadow-sm" title="Edit Profile">
-                                            <Edit2 size={16} />
-                                        </button>
-                                        {user.is_active !== false ? (
-                                            <button onClick={(e) => { e.stopPropagation(); handleUpdateStatus(user.user_id, false); }} className="p-2.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shadow-sm" title="Delete Account">
-                                                <Trash2 size={16} />
-                                            </button>
-                                        ) : (
-                                            <button onClick={(e) => { e.stopPropagation(); handleUpdateStatus(user.user_id, true); }} className="p-2.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all shadow-sm" title="Recover Account">
-                                                <RotateCcw size={16} />
-                                            </button>
+                                        
+                                        {openDropdownId === user.user_id && (
+                                            <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1" onClick={e => e.stopPropagation()}>
+                                                <button onClick={() => { setOpenDropdownId(null); setSelectedUser(user); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2">
+                                                    <Edit2 size={12}/> Edit
+                                                </button>
+                                                <button onClick={() => { setOpenDropdownId(null); toast.error('Account Restricted. Privileges revoked.'); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2">
+                                                    <Ban size={12}/> Restrict Account
+                                                </button>
+                                                {user.is_active !== false ? (
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, false); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 flex items-center gap-2 text-rose-500">
+                                                        <Lock size={12}/> Block Account
+                                                    </button>
+                                                ) : (
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 flex items-center gap-2 text-emerald-500">
+                                                        <Unlock size={12}/> Unblock Account
+                                                    </button>
+                                                )}
+                                            </div>
                                         )}
                                     </div>
                                 </td>
