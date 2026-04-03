@@ -98,78 +98,103 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead }: AdminLe
             <div className="space-y-6 relative ml-2">
                 <div className="absolute left-[13px] top-4 bottom-4 w-0.5 bg-slate-100"></div>
                 
-                {[
-                  { number: 1, label: 'Lead Received', realStage: 0, role: 'SALES_MANAGER' },
-                  { number: 2, label: 'R&D Preparation (In Progress)', realStage: 5, role: 'RND_MANAGER' },
-                  { number: 3, label: 'Packing Preparation (In Progress)', realStage: 6, role: 'PACKAGING_MANAGER' },
-                  { number: 4, label: 'Sales is Preparing to Dispatch', realStage: 11, role: 'SALES_EXECUTIVE' },
-                  { number: 5, label: 'Project Manager Closing', realStage: 19, role: 'PROJECT_MANAGER' }
-                ].map((s, idx) => {
-                    const nextStage = [0, 5, 6, 11, 19][idx + 1] || 999
-                    let isCurrent = lead.current_stage >= s.realStage && lead.current_stage < nextStage
-                    let isPast = lead.current_stage >= s.realStage && !isCurrent
-                    const isFuture = lead.current_stage < s.realStage
-                    const log = getRemarksForRole(s.role as Role)
-
-                    // Stage 1 Overrides: Always completed (black), no remarks
-                    if (s.number === 1) {
-                        isCurrent = false
-                        isPast = true
+                {(() => {
+                    const timelineBase = [
+                      { number: 1, label: 'Lead Created', realStage: 0, role: null as any, activeColor: 'border-slate-500', activeShadow: 'shadow-[0_0_15px_rgba(100,116,139,0.4)]', dotColor: 'bg-slate-500', textColor: 'text-slate-600', decoration: 'decoration-slate-500', pastColor: 'bg-slate-500 border-slate-500' },
+                      { number: 2, label: 'R&D Proceed (Briefing)', realStage: 2, role: 'RND_MANAGER' as Role, activeColor: 'border-purple-500', activeShadow: 'shadow-[0_0_15px_rgba(168,85,247,0.4)]', dotColor: 'bg-purple-500', textColor: 'text-purple-600', decoration: 'decoration-purple-500', pastColor: 'bg-black border-black' },
+                      { number: 3, label: 'Packaging Preparation', realStage: 4, role: 'PACKAGING_MANAGER' as Role, activeColor: 'border-orange-500', activeShadow: 'shadow-[0_0_15px_rgba(249,115,22,0.4)]', dotColor: 'bg-orange-500', textColor: 'text-orange-600', decoration: 'decoration-orange-500', pastColor: 'bg-black border-black' },
+                      { number: 4, label: 'Sales Dispatch', realStage: 9, role: 'SALES_MANAGER' as Role, activeColor: 'border-emerald-500', activeShadow: 'shadow-[0_0_15px_rgba(16,185,129,0.4)]', dotColor: 'bg-emerald-500', textColor: 'text-emerald-600', decoration: 'decoration-emerald-500', pastColor: 'bg-black border-black' },
+                      { number: 5, label: 'Project Manager Closing', realStage: 17, role: 'PROJECT_MANAGER' as Role, activeColor: 'border-blue-500', activeShadow: 'shadow-[0_0_15px_rgba(59,130,246,0.4)]', dotColor: 'bg-blue-500', textColor: 'text-blue-600', decoration: 'decoration-blue-500', pastColor: 'bg-black border-black' }
+                    ];
+                    
+                    if (lead.current_stage >= 14 && lead.current_stage <= 16) {
+                        timelineBase.push({ number: 6, label: 'Follow Up (Rejected)', realStage: 14, role: 'PROJECT_MANAGER' as Role, activeColor: 'border-rose-500', activeShadow: 'shadow-[0_0_15px_rgba(244,63,94,0.4)]', dotColor: 'bg-rose-500', textColor: 'text-rose-600', decoration: 'decoration-rose-500', pastColor: 'bg-black border-black' })
                     }
 
-                    return (
-                        <div key={idx} className="flex gap-6 relative z-10">
-                            <div className={cn(
-                                "w-7 h-7 rounded-full border-4 flex items-center justify-center shrink-0 transition-all duration-500",
-                                isCurrent ? "bg-white border-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]" :
-                                isPast ? "bg-black border-black shadow-sm" :
-                                "bg-white border-slate-100 opacity-30 shadow-inner grayscale"
-                            )}>
-                                {isPast && <CheckIcon size={12} className="text-white" />}
-                                {isCurrent && <div className="w-1.5 h-1.5 rounded-full bg-orange-500"></div>}
-                            </div>
-                            
-                            <div className="flex-1 space-y-3 pb-4">
+                    return timelineBase.map((s, idx) => {
+                        let isCurrent = false;
+                        let isPast = false;
+                        let isFuture = false;
+
+                        if (s.number === 1) {
+                             isCurrent = lead.current_stage < 2;
+                             isPast = lead.current_stage >= 2;
+                        } else if (s.number === 2) {
+                             isCurrent = lead.current_stage >= 2 && lead.current_stage < 4;
+                             isPast = lead.current_stage >= 4;
+                             isFuture = lead.current_stage < 2;
+                        } else if (s.number === 3) {
+                             isCurrent = lead.current_stage >= 4 && lead.current_stage < 9;
+                             isPast = lead.current_stage >= 9;
+                             isFuture = lead.current_stage < 4;
+                        } else if (s.number === 4) {
+                             isCurrent = lead.current_stage >= 9 && lead.current_stage < 14;
+                             isPast = lead.current_stage >= 14 || lead.current_stage === 17 || lead.current_stage === 19; 
+                             isFuture = lead.current_stage < 9;
+                        } else if (s.number === 5) {
+                             isCurrent = lead.current_stage === 17 || lead.current_stage === 19;
+                             isPast = lead.current_stage >= 14 && lead.current_stage <= 16; 
+                             isFuture = lead.current_stage < 17 && lead.current_stage < 14;
+                        } else if (s.number === 6) {
+                             isCurrent = lead.current_stage >= 14 && lead.current_stage <= 16;
+                        }
+
+                        const log = s.role ? getRemarksForRole(s.role) : null;
+
+                        return (
+                            <div key={idx} className="flex gap-6 relative z-10">
                                 <div className={cn(
-                                    "flex items-center gap-4 transition-opacity",
-                                    isFuture ? "opacity-30" : "opacity-100"
+                                    "w-7 h-7 rounded-full border-4 flex items-center justify-center shrink-0 transition-all duration-500",
+                                    isCurrent ? `bg-white ${s.activeColor} ${s.activeShadow}` :
+                                    isPast ? `${s.pastColor} shadow-sm` :
+                                    "bg-white border-slate-100 opacity-30 shadow-inner grayscale"
                                 )}>
-                                    <div className={cn(
-                                        "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0",
-                                        isCurrent ? "bg-orange-50 border-orange-200 text-orange-600" : 
-                                        isPast ? "bg-white border-black text-black" : 
-                                        "bg-white border-slate-100 text-slate-300"
-                                    )}>
-                                        Stage {s.number}
-                                    </div>
-                                    <span className={cn(
-                                        "text-xs font-black tracking-tight",
-                                        isCurrent ? "text-slate-900 underline decoration-orange-500 decoration-2 underline-offset-4" : 
-                                        isPast ? "text-black" : "text-slate-300"
-                                    )}>{s.label}</span>
+                                    {isPast && <CheckIcon size={12} className="text-white" />}
+                                    {isCurrent && <div className={cn("w-1.5 h-1.5 rounded-full", s.dotColor)}></div>}
                                 </div>
                                 
-                                {/* Inline Remarks Box */}
-                                {s.number !== 1 && (isPast || isCurrent) && (
+                                <div className="flex-1 space-y-3 pb-4">
                                     <div className={cn(
-                                        "p-4 rounded-3xl border transition-all",
-                                        log ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50 border-slate-100 border-dashed opacity-50"
+                                        "flex items-center gap-4 transition-opacity",
+                                        isFuture ? "opacity-30" : "opacity-100"
                                     )}>
-                                        <div className="flex items-center gap-2 mb-1.5">
-                                            <MsgIcon size={10} className="text-slate-400" />
-                                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
-                                                {s.role.replace('_', ' ')} Remark
-                                            </span>
+                                        <div className={cn(
+                                            "px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border shrink-0",
+                                            isCurrent ? `bg-white ${s.activeColor} ${s.textColor}` : 
+                                            isPast ? "bg-white border-black text-black" : 
+                                            "bg-white border-slate-100 text-slate-300"
+                                        )}>
+                                            Stage {s.number}
                                         </div>
-                                        <p className="text-[11px] leading-relaxed text-slate-600 font-semibold italic">
-                                            {log ? log.details : 'No remarks documented for this stage yet.'}
-                                        </p>
+                                        <span className={cn(
+                                            "text-xs font-black tracking-tight",
+                                            isCurrent ? `text-slate-900 underline ${s.decoration} decoration-2 underline-offset-4` : 
+                                            isPast ? "text-black" : "text-slate-300"
+                                        )}>{s.label}</span>
                                     </div>
-                                )}
+                                    
+                                    {/* Inline Remarks Box */}
+                                    {s.role && (isPast || isCurrent) && (
+                                        <div className={cn(
+                                            "p-4 rounded-3xl border transition-all",
+                                            log ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50 border-slate-100 border-dashed opacity-50"
+                                        )}>
+                                            <div className="flex items-center gap-2 mb-1.5">
+                                                <MsgIcon size={10} className="text-slate-400" />
+                                                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                                                    {s.role.replace('_', ' ')} Remark
+                                                </span>
+                                            </div>
+                                            <p className="text-[11px] leading-relaxed text-slate-600 font-semibold italic">
+                                                {log ? log.details : 'No remarks documented for this stage yet.'}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )
-                })}
+                        )
+                    })
+                })()}
             </div>
 
          </div>
