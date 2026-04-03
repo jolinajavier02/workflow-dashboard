@@ -46,7 +46,10 @@ export const authService = {
               throw new Error('Account does not exist in Sandbox Database. Please create it first.');
           }
           if (found.is_active === false) {
-              throw new Error('Account has been blocked or restricted by the Administrator.');
+              throw new Error('This account has been completely blocked by an Administrator.');
+          }
+          if (found.is_restricted === true) {
+              throw new Error('This account is strictly restricted by an Administrator. Contact support.');
           }
 
           localStorage.setItem('demo_auth_user_role', found.role);
@@ -82,11 +85,11 @@ export const authService = {
         if (stored) return JSON.parse(stored);
         
         const defaultProfiles = [
-            { user_id: 'adm-1', full_name: 'ADMIN', email: 'admin@workflow.com', phone_number: '+1 555-0000', role: 'ADMIN', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'rnd-1', full_name: 'R&D', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pkg-1', full_name: 'PACKAGING', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'sls-1', full_name: 'SALES', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pm-1', full_name: 'PROJECT MANAGER', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
+            { user_id: 'adm-1', full_name: 'ADMIN', email: 'admin@workflow.com', phone_number: '+1 555-0000', role: 'ADMIN', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'rnd-1', full_name: 'R&D', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pkg-1', full_name: 'PACKAGING', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'sls-1', full_name: 'SALES', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pm-1', full_name: 'PROJECT MANAGER', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
         ];
         localStorage.setItem('demo_profiles_v2', JSON.stringify(defaultProfiles));
         return defaultProfiles;
@@ -121,27 +124,28 @@ export const authService = {
     return { ...profile, user_id: profile.id } as Profile
   },
 
-  async updateProfileStatus(userId: string | number, isActive: boolean) {
+  async updateProfileState(userId: string | number, field: 'is_active' | 'is_restricted', value: boolean) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
         const idx = profiles.findIndex((p: any) => p.user_id === userId)
         if (idx > -1) {
-            profiles[idx].is_active = isActive
+            profiles[idx][field] = value
             localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
             
             const currentUser = await this.getUserProfile()
             if (currentUser) {
+                const action = value ? `Recover/Unblock: ${field}` : `Delete/Block: ${field}`
                 await activityService.log(
                     currentUser, 
-                    isActive ? 'Recover Account' : 'Delete Account', 
-                    `${isActive ? 'Recovered' : 'Deleted'} account for ${profiles[idx].full_name}`
+                    'Security Override', 
+                    `Admin explicitly changed ${field} to ${value} for ${profiles[idx].full_name}`
                 )
             }
         }
         return
     }
 
-    const { error } = await supabase.from('profiles').update({ is_active: isActive }).eq('id', userId)
+    const { error } = await supabase.from('profiles').update({ [field]: value }).eq('id', userId)
     if (error) throw error
   }
 }

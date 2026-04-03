@@ -45,10 +45,10 @@ export default function AdminPage() {
     }
   }
 
-  const handleUpdateStatus = async (userId: string | number, isActive: boolean) => {
+  const handleUpdateStatus = async (userId: string | number, field: 'is_active' | 'is_restricted', value: boolean) => {
       try {
-          await authService.updateProfileStatus(userId, isActive)
-          toast.success(`Account successfully ${isActive ? 'recovered' : 'deleted'}`)
+          await authService.updateProfileState(userId, field, value)
+          toast.success(`Account state officially successfully updated`)
           fetchUsers()
       } catch (error: any) {
           toast.error('Failed to change account status: ' + error.message)
@@ -122,7 +122,7 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                         {displayedUsers.map((user) => (
-                            <tr key={user.user_id} className={`hover:bg-slate-50/80 transition-all group cursor-pointer ${user.is_active === false ? 'opacity-60' : ''}`} onClick={() => setSelectedUser(user)}>
+                            <tr key={user.user_id} className={`hover:bg-slate-50/80 transition-all group cursor-pointer ${user.is_active === false || user.is_restricted ? 'opacity-50 grayscale-[0.5]' : ''}`} onClick={() => setSelectedUser(user)}>
                                 <td className="px-8 py-6">
                                     <div className="flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold shadow-sm ring-4 ring-white capitalize ${user.is_active === false ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
@@ -148,17 +148,26 @@ export default function AdminPage() {
                                         {openDropdownId === user.user_id && (
                                             <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-100 rounded-xl shadow-xl z-50 py-1" onClick={e => e.stopPropagation()}>
                                                 <button onClick={() => { setOpenDropdownId(null); setSelectedUser(user); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2">
+                                                    <Eye size={12}/> View Profile
+                                                </button>
+                                                <button onClick={() => { setOpenDropdownId(null); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 flex items-center gap-2">
                                                     <Edit2 size={12}/> Edit
                                                 </button>
-                                                <button onClick={() => { setOpenDropdownId(null); toast.error('Account Restricted. Privileges revoked.'); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2">
-                                                    <Ban size={12}/> Restrict Account
-                                                </button>
+                                                {user.is_restricted !== true ? (
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_restricted', true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2 text-amber-600">
+                                                        <Ban size={12}/> Restrict Account
+                                                    </button>
+                                                ) : (
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_restricted', false); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 flex items-center gap-2 text-emerald-500">
+                                                        <Unlock size={12}/> Unrestrict Account
+                                                    </button>
+                                                )}
                                                 {user.is_active !== false ? (
-                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, false); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 flex items-center gap-2 text-rose-500">
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_active', false); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 flex items-center gap-2 text-rose-500">
                                                         <Lock size={12}/> Block Account
                                                     </button>
                                                 ) : (
-                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 flex items-center gap-2 text-emerald-500">
+                                                    <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_active', true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 flex items-center gap-2 text-emerald-500">
                                                         <Unlock size={12}/> Unblock Account
                                                     </button>
                                                 )}

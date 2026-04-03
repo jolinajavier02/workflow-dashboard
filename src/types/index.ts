@@ -7,6 +7,7 @@ export interface Profile {
   phone_number?: string;
   role: Role;
   is_active: boolean;
+  is_restricted?: boolean;
   created_by?: number;
   created_at: string;
   last_login?: string;
