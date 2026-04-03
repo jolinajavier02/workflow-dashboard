@@ -86,7 +86,17 @@ export const authService = {
 
   async getProfiles() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        return JSON.parse(localStorage.getItem('demo_profiles') || '[]')
+        const stored = localStorage.getItem('demo_profiles')
+        if (stored) return JSON.parse(stored);
+        
+        const defaultProfiles = [
+            { user_id: 'rnd-1', full_name: 'Dr. RND User', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pkg-1', full_name: 'Pack Manager', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'sls-1', full_name: 'Sales Executive', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pm-1', full_name: 'Lead PM', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
+        ];
+        localStorage.setItem('demo_profiles', JSON.stringify(defaultProfiles));
+        return defaultProfiles;
     }
     const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false })
     if (error) throw error
