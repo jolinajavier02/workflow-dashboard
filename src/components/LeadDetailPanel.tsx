@@ -43,7 +43,7 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
     </div>
   )
 
-  const isImage = (url: string) => /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url)
+  const isImage = (url: string) => url && (/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url) || url.startsWith('data:image/'))
   const isPrivileged = userRole && ['ADMIN', 'OWNER', 'SALES_MANAGER', 'SALES_EXECUTIVE'].includes(userRole)
 
   const handleActionSubmit = async (status: Lead['color_status'], comment: string) => {

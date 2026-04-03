@@ -38,7 +38,7 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
       return roleActivities.length > 0 ? roleActivities[0] : null
   }
 
-  const isImage = (url?: string) => url && /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url)
+  const isImage = (url?: string) => url && (/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url) || url.startsWith('data:image/'))
 
   return (
     <div className="fixed inset-0 z-[500] bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-300">

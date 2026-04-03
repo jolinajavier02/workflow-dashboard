@@ -9,7 +9,7 @@ import {
 import { Lead, Role } from '@/types'
 import { cn } from '@/utils/cn'
 
-const isImage = (url?: string) => url && /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url)
+const isImage = (url?: string) => url && (/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url) || url.startsWith('data:image/'))
 
 interface LeadActionModalProps {
   isOpen: boolean
@@ -117,14 +117,14 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
               {/* Comment Field (Required) */}
               <div className="space-y-3 flex-1 mb-6">
                 <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Mandatory Operational Remark *</label>
-                <div className={cn("relative h-[calc(100%-2rem)]", !isMyTurn ? "opacity-60" : "")}>
+                <div className={cn("relative", !isMyTurn ? "opacity-60" : "")}>
                     <MessageSquare className="absolute left-5 top-5 text-slate-400" size={18} />
                     <textarea 
                         value={comment}
                         disabled={!isMyTurn}
                         onChange={(e) => setComment(e.target.value)}
                         placeholder={isMyTurn ? "Enter finalize remarks to advance pipeline..." : "Action locked: Awaiting previous stage operations"}
-                        className="w-full h-full min-h-[200px] pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm text-slate-800 resize-none disabled:bg-slate-50 disabled:cursor-not-allowed"
+                        className="w-full min-h-[120px] max-h-[400px] pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-colors font-bold text-sm text-slate-800 resize-y disabled:bg-slate-50 disabled:cursor-not-allowed"
                     />
                 </div>
               </div>

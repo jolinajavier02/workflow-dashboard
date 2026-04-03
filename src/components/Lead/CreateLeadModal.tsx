@@ -28,6 +28,28 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [createdLead, setCreatedLead] = useState<any>(null)
+  const [fileName, setFileName] = useState('')
+
+  const handleImageUpload = (file: File) => {
+      setFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+          const img = new window.Image();
+          img.src = e.target?.result as string;
+          img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 800;
+              const scaleSize = Math.min(MAX_WIDTH / img.width, 1);
+              canvas.width = img.width * scaleSize;
+              canvas.height = img.height * scaleSize;
+              const ctx = canvas.getContext('2d');
+              ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL('image/webp', 0.6); // aggressively compress
+              setFormData({...formData, requirement_brief: dataUrl});
+          }
+      };
+      reader.readAsDataURL(file);
+  }
 
   const handleInnerSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -157,11 +179,20 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
                         {/* Section 5: Attachments */}
                         <div className="space-y-2">
                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2">Attach Requirement Brief</label>
-                             <div className="relative border-4 border-dashed border-slate-100 rounded-[40px] p-12 flex flex-col items-center justify-center text-slate-300 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group bg-white">
-                                 <Upload size={32} className="mb-4 text-slate-200 group-hover:text-blue-500 transition-all" />
-                                 <span className="text-sm font-black text-slate-900">{formData.requirement_brief || 'Select Production Brief File'}</span>
-                                 <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
-                                     if(e.target.files?.[0]) setFormData({...formData, requirement_brief: e.target.files[0].name})
+                             <div className="relative border-4 border-dashed border-slate-100 rounded-[40px] p-12 flex flex-col items-center justify-center text-slate-300 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer group bg-white overflow-hidden">
+                                 {formData.requirement_brief && formData.requirement_brief.startsWith('data:image') ? (
+                                     <div className="flex flex-col items-center">
+                                         <img src={formData.requirement_brief} alt="Preview" className="h-24 w-auto rounded-xl shadow-sm mb-4 object-cover" />
+                                         <span className="text-sm font-black text-blue-600 truncate max-w-[200px]">{fileName}</span>
+                                     </div>
+                                 ) : (
+                                     <>
+                                         <Upload size={32} className="mb-4 text-slate-200 group-hover:text-blue-500 transition-all" />
+                                         <span className="text-sm font-black text-slate-900 truncate max-w-xs">{formData.requirement_brief || 'Select Production Brief Image (Auto-Compress to WebP)'}</span>
+                                     </>
+                                 )}
+                                 <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                                     if(e.target.files?.[0]) handleImageUpload(e.target.files[0])
                                  }} />
                              </div>
                         </div>
