@@ -20,7 +20,7 @@ import {
 
 export default function PipelinePage() {
   const { userRole, userProfile } = useAuth()
-  const { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever } = useLeads(userProfile)
+  const { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever, updateLead } = useLeads(userProfile)
   
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
@@ -148,10 +148,9 @@ export default function PipelinePage() {
                     }
                 }
 
-                const { leadService } = await import('@/services/leadService')
                 const { activityService } = await import('@/services/activityService')
                 
-                await leadService.updateLead(Number(lead.id), { 
+                await updateLead(lead.id as any, { 
                     current_stage: targetStage,
                     last_viewed_by: userProfile?.full_name,
                     last_viewed_at: new Date().toISOString()
@@ -166,6 +165,7 @@ export default function PipelinePage() {
                     )
                 }
 
+                setSelectedLeadId(null)
                 fetchLeads() // Refresh list
             }}
           />

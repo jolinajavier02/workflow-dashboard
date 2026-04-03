@@ -148,5 +148,22 @@ export function useLeads(userProfile: Profile | null) {
     }
   }
 
-  return { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever }
+  const updateLead = async (id: string, updates: Partial<Lead>) => {
+    try {
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+          const storedLeadsRaw = localStorage.getItem('demo_data_store_leads')
+          const allStoredLeads = storedLeadsRaw ? JSON.parse(storedLeadsRaw) : []
+          const updated = allStoredLeads.map((l: any) => l.id === id ? { ...l, ...updates } : l)
+          saveLeadsToStorage(updated)
+          fetchLeads()
+          return
+      }
+      await leadService.updateLead(parseInt(id), updates)
+      fetchLeads()
+    } catch (err: any) {
+      toast.error("Update failed: " + err.message)
+    }
+  }
+
+  return { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever, updateLead }
 }
