@@ -37,7 +37,7 @@ export default function PipelinePage() {
   const dotColorMap: Record<string, string> = {
       'blue': 'bg-blue-600 shadow-[0_0_15px_rgba(37,99,235,0.4)]',
       'purple': 'bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]',
-      'amber': 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.4)]',
+      'amber': 'bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.4)]',
       'teal': 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.4)]',
       'rose': 'bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.4)]',
       'emerald': 'bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.4)]',
