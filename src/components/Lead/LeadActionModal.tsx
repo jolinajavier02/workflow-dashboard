@@ -19,9 +19,12 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
 
   if (!isOpen) return null
 
-  const handleSubmit = async (e: React.FormEvent, customStatus?: string) => {
+  const handleSubmit = async (e: React.FormEvent | React.MouseEvent, customStatus?: string) => {
     e.preventDefault()
-    if (!comment.trim()) return
+    if (!comment.trim()) {
+        alert("Action Denied: You must supply a mandatory operational remark before advancing the pipeline.")
+        return
+    }
     
     setLoading(true)
     try {
@@ -95,7 +98,6 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
                 <div className="relative h-[calc(100%-2rem)]">
                     <MessageSquare className="absolute left-5 top-5 text-slate-400" size={18} />
                     <textarea 
-                        required
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Enter finalize remarks to advance pipeline..."
@@ -109,26 +111,23 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
                 {isPM ? (
                    <div className="grid grid-cols-2 gap-4">
                       <button 
-                        disabled={loading || !comment.trim()}
-                        onClick={(e) => handleSubmit(e as any, 'PM_FOLLOW_UP')}
+                        type="button"
+                        onClick={(e) => handleSubmit(e, 'PM_FOLLOW_UP')}
                         className="bg-rose-500 text-white font-black py-5 rounded-[24px] hover:bg-rose-600 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
                       >
-                        <Send size={18} />
-                        Finalize to Follow-Up
+                        {loading ? 'Routing...' : <><Send size={18} /> Finalize to Follow-Up</>}
                       </button>
                       <button 
-                        disabled={loading || !comment.trim()}
-                        onClick={(e) => handleSubmit(e as any, 'PM_CLOSING')}
+                        type="button"
+                        onClick={(e) => handleSubmit(e, 'PM_CLOSING')}
                         className="bg-blue-600 text-white font-black py-5 rounded-[24px] hover:bg-blue-700 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
                       >
-                        <Archive size={18} />
-                        Finalize to Closing
+                        {loading ? 'Securing...' : <><Archive size={18} /> Finalize to Closing</>}
                       </button>
                    </div>
                 ) : (
                    <button 
                     type="submit" 
-                    disabled={loading || !comment.trim()}
                     className="w-full bg-slate-900 text-white font-black py-6 rounded-[28px] hover:bg-black transition-all shadow-2xl flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
                    >
                     {loading ? 'Processing Pipeline Move...' : (
