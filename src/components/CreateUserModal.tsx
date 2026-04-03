@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import { X, UserPlus, Mail, Phone, Shield, CheckCircle2 } from 'lucide-react'
 import { Role } from '@/types'
 
-const ROLES: Role[] = ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER']
+const ROLES: Role[] = ['ADMIN', 'SALES_MANAGER', 'SALES_EXECUTIVE', 'RND_MANAGER', 'PACKAGING_MANAGER', 'OWNER', 'PROJECT_MANAGER', 'STAFF', 'CLIENT', 'COORDINATOR']
 
 interface CreateUserModalProps {
   isOpen: boolean
@@ -28,7 +28,14 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
     e.preventDefault()
     setLoading(true)
     try {
-      await onSubmit(formData)
+      const payload = {
+          full_name: formData.full_name,
+          email: formData.email,
+          phone_number: formData.phone_number,
+          role: formData.role,
+          password_hash: formData.password
+      }
+      await onSubmit(payload)
       onClose()
       setFormData({ full_name: '', email: '', phone_number: '', role: 'SALES_EXECUTIVE', password: '' })
     } finally {

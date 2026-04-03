@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'SALES_MANAGER' | 'SALES_EXECUTIVE' | 'RND_MANAGER' | 'PACKAGING_MANAGER' | 'OWNER' | 'PROJECT_MANAGER';
+export type Role = 'ADMIN' | 'SALES_MANAGER' | 'SALES_EXECUTIVE' | 'RND_MANAGER' | 'PACKAGING_MANAGER' | 'OWNER' | 'PROJECT_MANAGER' | 'STAFF' | 'CLIENT' | 'COORDINATOR';
 
 export interface Profile {
   user_id: number;

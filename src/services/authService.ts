@@ -34,41 +34,33 @@ export const authService = {
   },
 
   async login(email: string) {
-      // Mock logic as requested
-      let role = 'ADMIN'
-      let name = 'System Administrator'
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+          // Dynamic Sandbox Look-Up Database Engine
+          const defaultRoles = await this.getProfiles(); // ensure they are loaded
+          const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]');
+          
+          // Allow loose matching (e.g. typing "rnd" instead of "rnd@workflow.com")
+          const found = profiles.find((p: any) => p.email.toLowerCase() === email.toLowerCase() || p.email.toLowerCase().startsWith(email.toLowerCase()));
+          
+          if (!found) {
+              throw new Error('Account does not exist in Sandbox Database. Please create it first.');
+          }
+          if (found.is_active === false) {
+              throw new Error('Account has been blocked or restricted by the Administrator.');
+          }
 
-      if (email.startsWith('owner')) {
-          role = 'OWNER'
-          name = 'Company Owner'
-      } else if (email.startsWith('project')) {
-          role = 'PROJECT_MANAGER'
-          name = 'Senior Project Manager'
-      } else if (email.startsWith('rnd')) {
-          role = 'RND_MANAGER'
-          name = 'R&D Director'
-      } else if (email.startsWith('sales')) {
-          role = 'SALES_MANAGER'
-          name = 'Sales Manager'
-      } else if (email.startsWith('packaging')) {
-          role = 'PACKAGING_MANAGER'
-          name = 'Packaging Manager'
+          localStorage.setItem('demo_auth_user_role', found.role);
+          localStorage.setItem('demo_auth_user_name', found.full_name);
+          localStorage.setItem('demo_auth_user_email', found.email);
+          
+          await activityService.log(found, 'Session Started', `User logged in securely directly via local sandbox authentication.`);
+          return { role: found.role, name: found.full_name };
       }
 
-      localStorage.setItem('demo_auth_user_role', role)
-      localStorage.setItem('demo_auth_user_name', name)
-      
-      const profile = { 
-          user_id: 1, 
-          full_name: name, 
-          email: 'demo@workflow.com',
-          role: role as Role, 
-          is_active: true, 
-          created_at: new Date().toISOString() 
-      }
-      await activityService.log(profile, 'Session Started', `User logged in using ${email}`)
-
-      return { role, name }
+      // Live Production fallback
+      const { data, error } = await supabase.auth.signInWithOtp({ email })
+      if (error) throw error
+      return data
   },
 
   async logout() {

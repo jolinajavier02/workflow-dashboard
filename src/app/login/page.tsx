@@ -17,7 +17,7 @@ export default function LoginPage() {
     setLoading(true)
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-         const { name } = await authService.login(email)
+         const { name } = (await authService.login(email)) as any
          toast.success(`Logged in as ${name} (Demo)`)
          router.push('/dashboard/pipeline')
          return
