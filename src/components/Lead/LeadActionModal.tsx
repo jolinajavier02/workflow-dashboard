@@ -37,7 +37,7 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
   return (
     <div className="fixed inset-0 z-[500] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-white w-full max-w-2xl rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
+      <div className="relative bg-white w-full max-w-5xl rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in duration-300 border border-slate-100">
         
         {/* Header Section */}
         <div className="bg-slate-900 p-8 text-white relative">
@@ -58,10 +58,10 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
           </div>
         </div>
 
-        <form onSubmit={(e) => handleSubmit(e)} className="p-10 space-y-8 max-h-[70vh] overflow-y-auto scrollbar-hide">
+        <form onSubmit={(e) => handleSubmit(e)} className="p-10 grid grid-cols-2 gap-10 max-h-[70vh] overflow-y-auto scrollbar-hide">
           
-          {/* Reference Info (Packing, Requirements, Image) */}
-          <div className="grid grid-cols-2 gap-8">
+          {/* LEFT COLUMN: Reference Info (Requirements, Packing, Image) */}
+          <div className="space-y-8 h-full flex flex-col">
             <div className="space-y-6">
                <div>
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Lead Requirements</label>
@@ -75,69 +75,71 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
                   </p>
                </div>
             </div>
-            <div>
+            <div className="flex-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Visual Reference</label>
                 {lead.requirement_brief ? (
-                    <img src={lead.requirement_brief} alt="Ref" className="w-full h-40 object-cover rounded-3xl border border-slate-100 shadow-sm" />
+                    <img src={lead.requirement_brief} alt="Ref" className="w-full h-48 object-cover rounded-3xl border border-slate-100 shadow-sm" />
                 ) : (
-                    <div className="w-full h-40 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-300">
+                    <div className="w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-300">
                         <Paperclip size={24} />
                     </div>
                 )}
             </div>
           </div>
 
-          {/* Comment Field (Required) */}
-          <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Mandatory Operational Remark *</label>
-            <div className="relative">
-                <MessageSquare className="absolute left-5 top-5 text-slate-400" size={18} />
-                <textarea 
-                    required
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    placeholder="Enter finalize remarks to advance pipeline..."
-                    rows={4}
-                    className="w-full pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm text-slate-800"
-                />
-            </div>
-          </div>
+          {/* RIGHT COLUMN: Action Form (Comment + Buttons) */}
+          <div className="flex flex-col h-full bg-slate-50/50 p-8 rounded-[32px] border border-slate-100">
+              {/* Comment Field (Required) */}
+              <div className="space-y-3 flex-1 mb-6">
+                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block ml-1">Mandatory Operational Remark *</label>
+                <div className="relative h-[calc(100%-2rem)]">
+                    <MessageSquare className="absolute left-5 top-5 text-slate-400" size={18} />
+                    <textarea 
+                        required
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Enter finalize remarks to advance pipeline..."
+                        className="w-full h-full min-h-[200px] pl-14 pr-5 py-5 bg-white border border-slate-200 rounded-[32px] outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all font-bold text-sm text-slate-800 resize-none"
+                    />
+                </div>
+              </div>
 
-          {/* Role-Based Action Buttons */}
-          <div className="space-y-4">
-            {isPM ? (
-               <div className="grid grid-cols-2 gap-4">
-                  <button 
+              {/* Role-Based Action Buttons */}
+              <div className="shrink-0">
+                {isPM ? (
+                   <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        disabled={loading || !comment.trim()}
+                        onClick={(e) => handleSubmit(e as any, 'PM_FOLLOW_UP')}
+                        className="bg-rose-500 text-white font-black py-5 rounded-[24px] hover:bg-rose-600 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
+                      >
+                        <Send size={18} />
+                        Finalize to Follow-Up
+                      </button>
+                      <button 
+                        disabled={loading || !comment.trim()}
+                        onClick={(e) => handleSubmit(e as any, 'PM_CLOSING')}
+                        className="bg-blue-600 text-white font-black py-5 rounded-[24px] hover:bg-blue-700 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
+                      >
+                        <Archive size={18} />
+                        Finalize to Closing
+                      </button>
+                   </div>
+                ) : (
+                   <button 
+                    type="submit" 
                     disabled={loading || !comment.trim()}
-                    onClick={(e) => handleSubmit(e as any, 'PM_FOLLOW_UP')}
-                    className="bg-rose-500 text-white font-black py-5 rounded-[24px] hover:bg-rose-600 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
-                  >
-                    <Send size={18} />
-                    Finalize to Follow-Up
-                  </button>
-                  <button 
-                    disabled={loading || !comment.trim()}
-                    onClick={(e) => handleSubmit(e as any, 'PM_CLOSING')}
-                    className="bg-blue-600 text-white font-black py-5 rounded-[24px] hover:bg-blue-700 transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[10px]"
-                  >
-                    <Archive size={18} />
-                    Finalize to Closing
-                  </button>
-               </div>
-            ) : (
-               <button 
-                type="submit" 
-                disabled={loading || !comment.trim()}
-                className="w-full bg-slate-900 text-white font-black py-6 rounded-[28px] hover:bg-black transition-all shadow-2xl flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
-               >
-                {loading ? 'Processing Pipeline Move...' : (
-                  <>
-                    <Zap size={20} className="fill-white" />
-                    Finalize Action & Proceed
-                  </>
+                    className="w-full bg-slate-900 text-white font-black py-6 rounded-[28px] hover:bg-black transition-all shadow-2xl flex items-center justify-center gap-3 uppercase tracking-[0.2em] text-xs"
+                   >
+                    {loading ? 'Processing Pipeline Move...' : (
+                      <>
+                        <Zap size={20} className="fill-white" />
+                        Finalize Action & Proceed
+                      </>
+                    )}
+                   </button>
                 )}
-               </button>
-            )}
+              </div>
           </div>
         </form>
 
