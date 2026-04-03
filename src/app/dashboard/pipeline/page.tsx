@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 
 export default function PipelinePage() {
-  const { userRole, userProfile } = useAuth()
+  const { userRole, userProfile, loading: authLoading } = useAuth()
   const { leads, loading, fetchLeads, createLead, trashLead, deleteLeadForever, updateLead } = useLeads(userProfile)
   
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
@@ -112,13 +112,13 @@ export default function PipelinePage() {
       />
 
       {/* Role-Based Lead Profile Access */}
-      {selectedLeadId && (userRole === 'ADMIN' || userRole === 'OWNER') ? (
+      {!authLoading && selectedLeadId && (userRole === 'ADMIN' || userRole === 'OWNER') ? (
           <AdminLeadProfileModal 
             isOpen={true}
             onClose={() => setSelectedLeadId(null)}
             lead={activeLeads.find(l => l.id === selectedLeadId)!}
           />
-      ) : selectedLeadId ? (
+      ) : !authLoading && selectedLeadId ? (
           <LeadActionModal 
             isOpen={true}
             onClose={() => setSelectedLeadId(null)}

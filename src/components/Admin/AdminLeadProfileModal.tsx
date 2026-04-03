@@ -2,8 +2,13 @@
 
 import React, { useEffect, useState } from 'react'
 import { Lead, Role, STAGES, ActivityRecord } from '@/types'
-import * as LucideIcons from 'lucide-react'
-const { X: XIcon, CheckCircle2: CheckIcon, Eye: EyeIcon, Building2: BuildingIcon, Package: PackageIcon, Paperclip: PaperclipIcon, FlaskConical: FlaskIcon, Clock: ClockIcon, MessageSquare: MsgIcon } = LucideIcons
+import { 
+  X as XIcon, CheckCircle2 as CheckIcon, Eye as EyeIcon, 
+  Building2 as BuildingIcon, Package as PackageIcon, 
+  Paperclip as PaperclipIcon, FlaskConical as FlaskIcon, 
+  Clock as ClockIcon, MessageSquare as MsgIcon,
+  User as UserIcon, Phone as PhoneIcon, Mail as MailIcon
+} from 'lucide-react'
 
 import { cn } from '@/utils/cn'
 import { activityService } from '@/services/activityService'
@@ -55,25 +60,25 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead }: AdminLe
            </div>
            <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
            <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-              <LucideIcons.User size={16} className="text-slate-500"/>
+              <UserIcon size={16} className="text-slate-500"/>
               <span>{lead.client_name}</span>
            </div>
            {lead.phone_number && (
              <>
                <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-               <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-                  <LucideIcons.Phone size={14} className="text-slate-500"/>
-                  <span>{lead.phone_number}</span>
-               </div>
+                <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
+                   <PhoneIcon size={14} className="text-slate-500"/>
+                   <span>{lead.phone_number}</span>
+                </div>
              </>
            )}
            {lead.email_address && (
              <>
                <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-               <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-                  <LucideIcons.Mail size={14} className="text-slate-500"/>
-                  <span>{lead.email_address}</span>
-               </div>
+                <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
+                   <MailIcon size={14} className="text-slate-500"/>
+                   <span>{lead.email_address}</span>
+                </div>
              </>
            )}
            <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>

@@ -1,9 +1,15 @@
 'use client'
 
 import React, { useState } from 'react'
-import { X, CheckCircle2, MessageSquare, AlertCircle, Package, FlaskConical, Paperclip, Zap, Send, Archive } from 'lucide-react'
+import { 
+  X, CheckCircle2, MessageSquare, AlertCircle, 
+  Package, FlaskConical, Paperclip, Zap, 
+  Send, Archive, User, Phone, Mail, Building2
+} from 'lucide-react'
 import { Lead, Role } from '@/types'
 import { cn } from '@/utils/cn'
+
+const isImage = (url?: string) => url && /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url)
 
 interface LeadActionModalProps {
   isOpen: boolean
@@ -81,7 +87,14 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
             <div className="flex-1">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2 px-1">Visual Reference</label>
                 {lead.requirement_brief ? (
-                    <img src={lead.requirement_brief} alt="Ref" className="w-full h-48 object-cover rounded-3xl border border-slate-100 shadow-sm" />
+                    isImage(lead.requirement_brief) ? (
+                        <img src={lead.requirement_brief} alt="Ref" className="w-full h-48 object-cover rounded-3xl border border-slate-100 shadow-sm" />
+                    ) : (
+                        <div className="w-full h-48 bg-slate-50 border p-6 border-slate-100 rounded-3xl flex flex-col items-center justify-center text-center">
+                            <Paperclip size={24} className="text-blue-500 mb-3" />
+                            <p className="text-[10px] font-bold text-slate-500 break-all">{lead.requirement_brief}</p>
+                        </div>
+                    )
                 ) : (
                     <div className="w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-300">
                         <Paperclip size={24} />
