@@ -83,10 +83,10 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
             <Clock size={10} className="text-slate-300" />
             <span>{formattedTime}</span>
          </div>
-         <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded border border-slate-100">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-slate-50 rounded border border-slate-100">
             <User size={10} className="text-slate-400" />
-            <span className="text-[10px] font-black text-slate-800">Stage {displayStage}</span>
-         </div>
+            <span className="text-[10px] font-black text-slate-800">{displayStage}</span>
+          </div>
       </div>
       
       {/* Bottom strip progress bar colored by stage */}
