@@ -1,11 +1,14 @@
 'use client'
 
 import { Role } from '@/types'
+import { createClient } from '@/api/supabase/client'
+
+const supabase = createClient()
 
 export interface Notification {
   id: string;
-  user_id?: string | number; // Specific recipient
-  role?: Role; // Global recipient by role
+  user_id?: string | number; 
+  role?: Role; 
   title: string;
   message: string;
   type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR' | 'LEAD' | 'SECURITY';
@@ -19,11 +22,16 @@ export const notificationService = {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
       const stored = localStorage.getItem('demo_notifications_v2')
       const all = stored ? JSON.parse(stored) : []
-      // Filter for this user specifically or for their role
       return all.filter((n: any) => n.user_id === userId || n.role === userRole)
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as Notification[]
     }
-    return []
+
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .or(`user_id.eq.${userId},role.eq.${userRole}`)
+      .order('created_at', { ascending: false })
+    return data || []
   },
 
   async send(notif: Omit<Notification, 'id' | 'is_read' | 'created_at'>) {
@@ -40,6 +48,13 @@ export const notificationService = {
       localStorage.setItem('demo_notifications_v2', JSON.stringify(all))
       return newNotif
     }
+
+    const { data } = await supabase.from('notifications').insert([{
+        ...notif,
+        is_read: false,
+        created_at: new Date().toISOString()
+    }]).select().single()
+    return data
   },
 
   async markAsRead(id: string) {
@@ -48,7 +63,9 @@ export const notificationService = {
         const all = stored ? JSON.parse(stored) : []
         const updated = all.map((n: any) => n.id === id ? { ...n, is_read: true } : n)
         localStorage.setItem('demo_notifications_v2', JSON.stringify(updated))
+        return
     }
+    await supabase.from('notifications').update({ is_read: true }).eq('id', id)
   },
 
   async clearAll(userId: string | number) {
@@ -57,7 +74,9 @@ export const notificationService = {
           const all = stored ? JSON.parse(stored) : []
           const updated = all.filter((n: any) => n.user_id !== userId)
           localStorage.setItem('demo_notifications_v2', JSON.stringify(updated))
+          return
       }
+      await supabase.from('notifications').delete().eq('user_id', userId)
   },
 
   // Helper for common patterns
