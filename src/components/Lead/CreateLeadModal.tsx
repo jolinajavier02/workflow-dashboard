@@ -115,10 +115,8 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
                                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Layers size={10}/> Contact Role Category *</label>
                                 <select value={formData.contact_role_category} onChange={e => setFormData({...formData, contact_role_category: e.target.value})} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold outline-none appearance-none">
                                     <option value="owner">Owner</option>
-                                    <option value="project_manager">Project Manager</option>
                                     <option value="admin">Admin</option>
                                     <option value="sales">Sales</option>
-                                    <option value="rnd">R&D</option>
                                 </select>
                             </div>
                             <div className="space-y-2">
