@@ -2,9 +2,19 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutDashboard, Mail, Lock, ArrowRight } from 'lucide-react'
+import { LayoutDashboard, Mail, Lock, ArrowRight, Zap } from 'lucide-react'
 import { toast } from 'sonner'
 import { authService } from '@/services/authService'
+
+// Core accounts for quick login (matches CORE_ACCOUNTS in authService)
+const QUICK_LOGINS = [
+  { email: 'admin@workflow.com',     label: 'Admin',    color: 'bg-blue-600' },
+  { email: 'owner@workflow.com',     label: 'Owner',    color: 'bg-slate-900' },
+  { email: 'sales@workflow.com',     label: 'Sales',    color: 'bg-emerald-600' },
+  { email: 'rnd@workflow.com',       label: 'R&D',      color: 'bg-purple-600' },
+  { email: 'packaging@workflow.com', label: 'Packaging', color: 'bg-amber-600' },
+  { email: 'project@workflow.com',   label: 'Project',  color: 'bg-teal-600' },
+]
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -12,18 +22,26 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const doLogin = async (loginEmail: string) => {
     setLoading(true)
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-         const { name } = (await authService.login(email)) as any
-         toast.success(`Logged in as ${name} (Demo)`)
-         router.push('/dashboard/pipeline')
-         return
+        const result = (await authService.login(loginEmail)) as any
+        toast.success(`Logged in as ${result.name || loginEmail}`)
+        router.push('/dashboard/pipeline')
+        return
       }
-      // Standard auth would go here
-      toast.success('Successfully logged in')
+
+      // Live mode: match against CORE_ACCOUNTS and store session in localStorage
+      const match = QUICK_LOGINS.find(a => a.email.toLowerCase() === loginEmail.toLowerCase())
+      if (!match) {
+        toast.error('Account not recognized. Use one of the listed emails.')
+        return
+      }
+
+      // Store email so getUserProfile can find the correct role via CORE_ACCOUNTS
+      localStorage.setItem('demo_auth_user_email', match.email)
+      toast.success(`Welcome! Logged in as ${match.label}`)
       router.push('/dashboard/pipeline')
     } catch (error: any) {
       toast.error(error.message || 'Error signing in')
@@ -32,43 +50,63 @@ export default function LoginPage() {
     }
   }
 
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await doLogin(email)
+  }
+
   return (
     <div className="flex min-h-screen bg-slate-50 items-center justify-center p-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in duration-500">
         <div className="bg-slate-900 p-8 text-white flex flex-col items-center">
-            <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
-                <LayoutDashboard size={32} />
-            </div>
-          <h1 className="text-2xl font-bold tracking-tight">Sales & Ops Workflow</h1>
+          <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center mb-4">
+            <LayoutDashboard size={32} />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">SalesFlow CRM</h1>
+          <p className="text-slate-400 text-xs mt-1">Manufacturing Operations Dashboard</p>
         </div>
-        
+
         <form onSubmit={handleLogin} className="p-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none" />
+                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@workflow.com" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-200" />
               </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none" />
+                <input required type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-200" />
               </div>
             </div>
           </div>
 
-          <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 transition-all">
+          <button type="submit" disabled={loading} className="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-50">
             {loading ? 'Signing in...' : 'Sign In'}
-            {!loading && <ArrowRight />}
+            {!loading && <ArrowRight size={18} />}
           </button>
 
-          <div className="pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-[10px] text-slate-500 font-medium uppercase tracking-wider text-center">
-            <p>admin@workflow.com</p><p>sales@workflow.com</p>
-            <p>owner@workflow.com</p><p>project@workflow.com</p>
-            <p>rnd@workflow.com</p><p>packaging@workflow.com</p>
+          {/* Quick Login — one click per role */}
+          <div className="pt-4 border-t border-slate-100 space-y-3">
+            <p className="text-[10px] text-slate-400 uppercase tracking-widest text-center font-bold flex items-center justify-center gap-1">
+              <Zap size={10} /> Quick Access
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              {QUICK_LOGINS.map(({ email: qEmail, label, color }) => (
+                <button
+                  key={qEmail}
+                  type="button"
+                  onClick={() => doLogin(qEmail)}
+                  disabled={loading}
+                  className={`${color} text-white text-[10px] font-black uppercase tracking-widest py-2 px-1 rounded-lg hover:opacity-90 transition-all`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </form>
       </div>
