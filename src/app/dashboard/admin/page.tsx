@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react'
 import { Profile } from '@/types'
 import { authService } from '@/services/authService'
 import { toast } from 'sonner'
-import { Shield, Edit2, Trash2, UserPlus, Filter, Search, RotateCcw, Eye, MoreHorizontal, Ban, Lock, Unlock } from 'lucide-react'
+import { migrationService } from '@/services/migrationService'
+import { Shield, Edit2, Trash2, UserPlus, Filter, Search, RotateCcw, Eye, MoreHorizontal, Ban, Lock, Unlock, Cloud, Zap } from 'lucide-react'
 import CreateUserModal from '@/components/CreateUserModal'
 import ViewUserModal from '@/components/Admin/ViewUserModal'
 
@@ -67,13 +68,34 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold font-display text-slate-900 leading-tight">User Management</h1>
           <p className="text-slate-500 text-sm mt-1">Create and manage internal roles and permissions</p>
         </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
-        >
-            <UserPlus size={20} />
-            <span>Add Internal User</span>
-        </button>
+        <div className="flex items-center gap-3">
+            <button 
+              onClick={async () => {
+                  const confirmed = window.confirm("This will COPY all your Sandbox Leads, Users, and Activities and PASTE them into the Live Cloud Database. Are you ready to go LIVE?")
+                  if (confirmed) {
+                      toast.promise(async () => {
+                          await migrationService.migrateAll()
+                          await fetchUsers()
+                      }, {
+                          loading: 'Migrating sandbox work to global cloud...',
+                          success: 'Synchronized! Your work is now LIVE globally.',
+                          error: 'Migration failed. Please check cloud connection.'
+                      })
+                  }
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+            >
+                <Zap size={20} />
+                <span>Sync Sandbox to Cloud</span>
+            </button>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+            >
+                <UserPlus size={20} />
+                <span>Add Internal User</span>
+            </button>
+        </div>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
