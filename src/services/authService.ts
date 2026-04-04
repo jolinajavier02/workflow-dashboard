@@ -20,26 +20,42 @@ export const authService = {
       }
     }
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return null
+    let authUser = null;
+    try {
+        const { data: { user } } = await supabase.auth.getUser()
+        authUser = user;
+    } catch (e) {
+        console.warn("Supabase Auth not initialized:", e);
+    }
+
+    // If no Supabase user, check for Quick Login session (for global demo convenience)
+    if (!authUser) {
+        const email = localStorage.getItem('demo_auth_user_email');
+        if (email) {
+            const defaultProfiles = await this.getProfiles();
+            const found = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === email.toLowerCase());
+            if (found) return found;
+        }
+        return null;
+    }
 
     const { data: profile, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', user.id)
+      .eq('id', authUser.id)
       .single()
     
     if (error || !profile) {
         // SMART RECOVERY: If profile is missing in DB, check for organizational defaults
         const defaultProfiles = await this.getProfiles(); // This gets the defaults
-        const fallback = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === user.email?.toLowerCase());
+        const fallback = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === authUser.email?.toLowerCase());
         
         if (fallback) {
-            console.log("Smart Recovery: Auto-provisioning profile for", user.email);
+            console.log("Smart Recovery: Auto-provisioning profile for", authUser.email);
             const newProfileData = {
                 ...fallback,
-                id: user.id,
-                email: user.email,
+                id: authUser.id,
+                email: authUser.email,
                 is_active: true
             };
             delete (newProfileData as any).user_id; // prevent collision with DB 'id'
@@ -53,7 +69,7 @@ export const authService = {
             }
             
             // Temporary session fallback if DB insert fails
-            return { ...fallback, user_id: user.id } as Profile;
+            return { ...fallback, user_id: authUser.id } as Profile;
         }
         return null;
     }
