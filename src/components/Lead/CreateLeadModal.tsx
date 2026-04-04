@@ -65,6 +65,8 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
           priority, 
           lead_source, 
           requirement_brief, 
+          phone_number,
+          email_address,
           ...cleanFormData 
       } = formData
 
@@ -73,6 +75,8 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
       const richRequirementDetails = `${formData.requirement_details}
 
 --- TECHNICAL SPECS ---
+Phone: ${phone_number || 'N/A'}
+Email: ${email_address || 'N/A'}
 Formulation: ${formulation_details || 'N/A'}
 Packaging: ${packaging_details || 'N/A'}
 WhatsApp: ${whatsapp_number || 'N/A'}
