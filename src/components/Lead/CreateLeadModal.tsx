@@ -56,9 +56,10 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
     try {
       if (!formData.client_name || !formData.company_name) return
       
+      const { lead_id_input, ...cleanFormData } = formData
       await onSubmit({
-          ...formData,
-          lead_id: formData.lead_id_input ? parseInt(formData.lead_id_input) : Math.floor(Math.random() * 10000)
+          ...cleanFormData,
+          lead_id: lead_id_input ? parseInt(lead_id_input) : Math.floor(Math.random() * 10000)
       })
       handleResetAndClose()
     } finally {
