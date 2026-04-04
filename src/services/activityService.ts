@@ -29,16 +29,26 @@ export const activityService = {
     }
 
     // Production Supabase Audit Log
-    const { data } = await supabase.from('activities').insert([{
-        user_id: user.user_id,
-        user_name: user.full_name,
-        user_role: user.role,
-        action,
-        details,
-        lead_id,
-        timestamp: new Date().toISOString()
-    }]).select().single()
-    return data
+    try {
+        const { data, error } = await supabase.from('activities').insert([{
+            user_id: user.user_id,
+            user_name: user.full_name,
+            user_role: user.role,
+            action,
+            details,
+            lead_id,
+            timestamp: new Date().toISOString()
+        }]).select().single()
+        
+        if (error) {
+            console.warn("Activity sync failed:", error.message);
+            return null;
+        }
+        return data
+    } catch (e) {
+        console.warn("Activity system unavailable:", e);
+        return null;
+    }
   },
 
   getActivities: async (userId?: number | string, role?: Role) => {

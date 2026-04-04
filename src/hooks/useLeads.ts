@@ -88,8 +88,28 @@ export function useLeads(userProfile: Profile | null) {
       const newLead = await leadService.createLead(finalLeadData)
       
       if (userProfile) {
-          await activityService.log(userProfile, 'Enrolled Lead', `Registered global lead LD-${newLead.lead_id} for ${newLead.client_name}`)
-          await notificationService.notifyAdmins('Global Lead Enrolled', `New cloud lead LD-${newLead.lead_id} entered from ${userProfile.full_name}`, 'LEAD')
+          // Log global audit trail for compliance
+          await activityService.log(
+              userProfile, 
+              'Enrolled Lead', 
+              `Registered global lead LD-${newLead.lead_id} for ${newLead.client_name}`
+          )
+          
+          // Notify Global Overseers (Admins, Owners, Directors)
+          await notificationService.notifyAdmins(
+              'Global Lead Enrolled', 
+              `New cloud lead LD-${newLead.lead_id} entered from ${userProfile.full_name}`, 
+              'LEAD'
+          )
+          await notificationService.notifyRole('SALES_MANAGER', 'Sales Pipeline Update', `New lead LD-${newLead.lead_id} successfully entered the pipeline from ${userProfile.full_name}.`, 'INFO')
+          
+          // Notify the individual specifically assigned to approve/work on Stage 0
+          await notificationService.notifyRole(
+              'RND_MANAGER', 
+              'New Assignment', 
+              `Lead LD-${newLead.lead_id} is awaiting your technical formulation briefing.`, 
+              'WARNING'
+          )
       }
 
       fetchLeads()

@@ -52,12 +52,22 @@ export const notificationService = {
       return newNotif
     }
 
-    const { data } = await supabase.from('notifications').insert([{
-        ...notif,
-        is_read: false,
-        created_at: new Date().toISOString()
-    }]).select().single()
-    return data
+    try {
+        const { data, error } = await supabase.from('notifications').insert([{
+            ...notif,
+            is_read: false,
+            created_at: new Date().toISOString()
+        }]).select().single()
+        
+        if (error) {
+            console.warn("Notification sync failed:", error.message);
+            return null;
+        }
+        return data
+    } catch (e) {
+        console.warn("Notification system unavailable:", e);
+        return null;
+    }
   },
 
   async markAsRead(id: string) {
