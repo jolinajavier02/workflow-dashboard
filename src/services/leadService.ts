@@ -15,21 +15,29 @@ export const leadService = {
   },
 
   async createLead(lead: Partial<Lead>) {
+    // Strip frontend-only UI states that do not exist in the Strict DB schema
+    const { id, status, color_status, last_viewed_by, last_viewed_at, ...dbPayload } = lead as any;
+
     const { data, error } = await supabase
       .from('leads')
-      .insert([lead])
+      .insert([dbPayload])
       .select()
       .single()
     
     if (error) throw error
-    return data as Lead
+    return { ...data, status: status || 'active' } as Lead
   },
 
-  async updateLead(id: number, updates: Partial<Lead>) {
+  async updateLead(id: number | string, updates: Partial<Lead>) {
+    // Strip frontend-only UI states that do not exist in the Strict DB schema
+    const { id: _id, status, color_status, last_viewed_by, last_viewed_at, ...dbPayload } = updates as any;
+
+    if (Object.keys(dbPayload).length === 0) return;
+
     const { error } = await supabase
       .from('leads')
-      .update(updates)
-      .eq('id', id)
+      .update(dbPayload)
+      .eq('id', typeof id === 'string' ? parseInt(id) : id)
     
     if (error) throw error
   },
