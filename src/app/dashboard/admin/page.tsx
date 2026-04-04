@@ -4,13 +4,22 @@ import React, { useEffect, useState } from 'react'
 import { Profile } from '@/types'
 import { authService } from '@/services/authService'
 import { toast } from 'sonner'
-import { migrationService } from '@/services/migrationService'
-import { Shield, Edit2, Trash2, UserPlus, Filter, Search, RotateCcw, Eye, MoreHorizontal, Ban, Lock, Unlock, Cloud, Zap } from 'lucide-react'
+import { Shield, Edit2, Trash2, UserPlus, Search, Eye, MoreHorizontal, Ban, Lock, Unlock } from 'lucide-react'
 import CreateUserModal from '@/components/CreateUserModal'
 import ViewUserModal from '@/components/Admin/ViewUserModal'
 
+// Core accounts always shown — matches login quick-access
+const CORE_ACCOUNTS: Profile[] = [
+  { user_id: 1001, full_name: 'ADMIN MANAGER',    email: 'admin@workflow.com',     role: 'ADMIN',              is_active: true, created_at: '' },
+  { user_id: 1002, full_name: 'CORPORATE OWNER',  email: 'owner@workflow.com',     role: 'OWNER',              is_active: true, created_at: '' },
+  { user_id: 1003, full_name: 'SALES DIRECTOR',   email: 'sales@workflow.com',     role: 'SALES_MANAGER',      is_active: true, created_at: '' },
+  { user_id: 1004, full_name: 'R&D LEAD',         email: 'rnd@workflow.com',       role: 'RND_MANAGER',        is_active: true, created_at: '' },
+  { user_id: 1005, full_name: 'PACKAGING HUB',    email: 'packaging@workflow.com', role: 'PACKAGING_MANAGER',  is_active: true, created_at: '' },
+  { user_id: 1006, full_name: 'OPS MANAGER',      email: 'project@workflow.com',   role: 'PROJECT_MANAGER',    is_active: true, created_at: '' },
+]
+
 export default function AdminPage() {
-  const [users, setUsers] = useState<Profile[]>([])
+  const [users, setUsers] = useState<Profile[]>(CORE_ACCOUNTS)
   const [loading, setLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
@@ -21,9 +30,13 @@ export default function AdminPage() {
     setLoading(true)
     try {
       const data = await authService.getProfiles()
-      setUsers(data)
+      // Merge cloud users with CORE_ACCOUNTS — cloud users take priority, then fill in any missing cores
+      const cloudEmails = new Set(data.map((u: Profile) => u.email?.toLowerCase()))
+      const missingCores = CORE_ACCOUNTS.filter(c => !cloudEmails.has(c.email?.toLowerCase()))
+      setUsers([...data, ...missingCores])
     } catch (error: any) {
-      toast.error(error.message)
+      // On error, fall back to core accounts
+      setUsers(CORE_ACCOUNTS)
     } finally {
       setLoading(false)
     }
@@ -68,34 +81,13 @@ export default function AdminPage() {
           <h1 className="text-2xl font-bold font-display text-slate-900 leading-tight">User Management</h1>
           <p className="text-slate-500 text-sm mt-1">Create and manage internal roles and permissions</p>
         </div>
-        <div className="flex items-center gap-3">
-            <button 
-              onClick={async () => {
-                  const confirmed = window.confirm("This will COPY all your Sandbox Leads, Users, and Activities and PASTE them into the Live Cloud Database. Are you ready to go LIVE?")
-                  if (confirmed) {
-                      toast.promise(async () => {
-                          await migrationService.migrateAll()
-                          await fetchUsers()
-                      }, {
-                          loading: 'Migrating sandbox work to global cloud...',
-                          success: 'Synchronized! Your work is now LIVE globally.',
-                          error: 'Migration failed. Please check cloud connection.'
-                      })
-                  }
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
-            >
-                <Zap size={20} />
-                <span>Sync Sandbox to Cloud</span>
-            </button>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
-            >
-                <UserPlus size={20} />
-                <span>Add Internal User</span>
-            </button>
-        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-all shadow-lg shadow-slate-200"
+        >
+            <UserPlus size={20} />
+            <span>Add Internal User</span>
+        </button>
       </div>
 
       <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden min-h-[500px] flex flex-col">
