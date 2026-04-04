@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import { STAGE_COLUMNS, STAGES, Role } from '@/types'
-import LeadCard from '@/components/LeadCard'
+import LeadCard from '@/components/dashboard/LeadCard'
 import LeadDetailPanel from '@/components/LeadDetailPanel'
 import LeadActionModal from '@/components/Lead/LeadActionModal'
 import CreateLeadModal from '@/components/Lead/CreateLeadModal'
