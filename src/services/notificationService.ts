@@ -26,12 +26,15 @@ export const notificationService = {
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()) as Notification[]
     }
 
-    const { data } = await supabase
-      .from('notifications')
-      .select('*')
-      .or(`user_id.eq.${userId},role.eq.${userRole}`)
-      .order('created_at', { ascending: false })
-    return data || []
+    try {
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .or(`user_id.eq.${userId},role.eq.${userRole}`)
+        .order('created_at', { ascending: false })
+      if (error) { console.warn('Notifications table error:', error.message); return [] }
+      return data || []
+    } catch (e) { return [] }
   },
 
   async send(notif: Omit<Notification, 'id' | 'is_read' | 'created_at'>) {

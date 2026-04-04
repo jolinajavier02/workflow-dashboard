@@ -27,9 +27,18 @@ export default function PipelinePage() {
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [isCreateOpen, setIsCreateOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  // Filter pipeline to ignore trashed leads
-  const activeLeads = leads.filter(l => !l.is_trashed)
+  // Filter pipeline to ignore trashed leads + apply search
+  const activeLeads = leads.filter(l => !l.is_trashed).filter(l => {
+    if (!searchQuery.trim()) return true
+    const q = searchQuery.toLowerCase()
+    return (
+      String(l.lead_id).toLowerCase().includes(q) ||
+      (l.client_name || '').toLowerCase().includes(q) ||
+      (l.company_name || '').toLowerCase().includes(q)
+    )
+  })
   const groupedLeads = STAGE_COLUMNS.map(column => ({
     ...column,
     leads: activeLeads.filter(lead => column.stages.includes(lead.current_stage))
@@ -65,7 +74,12 @@ export default function PipelinePage() {
                 </button>
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input placeholder="Search Lead ID..." className="pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-64 outline-none" />
+                    <input 
+                    placeholder="Search by Lead ID, Client, or Company..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl w-64 outline-none focus:ring-2 focus:ring-blue-100 transition-all" 
+                />
                 </div>
                 {['OWNER', 'ADMIN', 'SALES_MANAGER'].includes(userRole!) && (
                     <button onClick={() => setIsCreateOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-blue-600 font-bold text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200">

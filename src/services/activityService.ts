@@ -53,8 +53,11 @@ export const activityService = {
     let query = supabase.from('activities').select('*').order('timestamp', { ascending: false })
     if (userId) query = query.eq('user_id', userId)
     if (role) query = query.eq('user_role', role)
-    const { data } = await query
-    return data || []
+    try {
+      const { data, error } = await query
+      if (error) { console.warn('Activity table error:', error.message); return [] }
+      return data || []
+    } catch (e) { return [] }
   },
 
   getLeadActivities: async (leadId: string) => {
@@ -62,7 +65,10 @@ export const activityService = {
         const all = JSON.parse(localStorage.getItem(STORE_KEY) || '[]')
         return all.filter((a: ActivityRecord) => a.lead_id === leadId)
     }
-    const { data } = await supabase.from('activities').select('*').eq('lead_id', leadId).order('timestamp', { ascending: false })
-    return data || []
+    try {
+      const { data, error } = await supabase.from('activities').select('*').eq('lead_id', leadId).order('timestamp', { ascending: false })
+      if (error) { console.warn('Activity table error:', error.message); return [] }
+      return data || []
+    } catch (e) { return [] }
   }
 }
