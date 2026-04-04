@@ -29,9 +29,36 @@ export const authService = {
       .eq('id', user.id)
       .single()
     
-    if (error) throw error
-    // Map id to user_id for compatibility with type
-    return { ...profile, user_id: profile.id } as Profile
+    if (error || !profile) {
+        // SMART RECOVERY: If profile is missing in DB, check for organizational defaults
+        const defaultProfiles = await this.getProfiles(); // This gets the defaults
+        const fallback = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === user.email?.toLowerCase());
+        
+        if (fallback) {
+            console.log("Smart Recovery: Auto-provisioning profile for", user.email);
+            const newProfileData = {
+                ...fallback,
+                id: user.id,
+                email: user.email,
+                is_active: true
+            };
+            delete (newProfileData as any).user_id; // prevent collision with DB 'id'
+            
+            // Try to create the profile in the cloud database
+            try {
+                const { data: created } = await supabase.from('profiles').insert([newProfileData]).select().single();
+                if (created) return { ...created, user_id: created.id } as Profile;
+            } catch (e) {
+                console.error("Auto-provisioning failed:", e);
+            }
+            
+            // Temporary session fallback if DB insert fails
+            return { ...fallback, user_id: user.id } as Profile;
+        }
+        return null;
+    }
+
+    return { ...profile, user_id: profile.id } as Profile;
   },
 
   async login(email: string) {
