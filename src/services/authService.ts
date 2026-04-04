@@ -5,19 +5,30 @@ import { notificationService } from './notificationService'
 
 const supabase = createClient()
 
+// Core organizational accounts — always available for Smart Recovery even if DB is empty
+const CORE_ACCOUNTS: Partial<Profile>[] = [
+  { email: 'admin@workflow.com',     full_name: 'ADMIN MANAGER',    role: 'ADMIN',              is_active: true },
+  { email: 'owner@workflow.com',     full_name: 'CORPORATE OWNER',  role: 'OWNER',              is_active: true },
+  { email: 'sales@workflow.com',     full_name: 'SALES DIRECTOR',   role: 'SALES_MANAGER',      is_active: true },
+  { email: 'rnd@workflow.com',       full_name: 'R&D LEAD',         role: 'RND_MANAGER',        is_active: true },
+  { email: 'packaging@workflow.com', full_name: 'PACKAGING HUB',    role: 'PACKAGING_MANAGER',  is_active: true },
+  { email: 'project@workflow.com',   full_name: 'OPS MANAGER',      role: 'PROJECT_MANAGER',    is_active: true },
+]
+
 export const authService = {
   async getUserProfile() {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
       const role = (localStorage.getItem('demo_auth_user_role') || 'ADMIN') as Role
       const name = localStorage.getItem('demo_auth_user_name') || 'Demo User'
+      const email = localStorage.getItem('demo_auth_user_email') || 'demo@workflow.com'
       return { 
         user_id: 1, 
         full_name: name, 
-        email: 'demo@workflow.com',
+        email,
         role, 
         is_active: true, 
         created_at: new Date().toISOString() 
-      }
+      } as Profile
     }
 
     let authUser = null;
@@ -28,13 +39,12 @@ export const authService = {
         console.warn("Supabase Auth not initialized:", e);
     }
 
-    // If no Supabase user, check for Quick Login session (for global demo convenience)
+    // If no Supabase session, check for a Quick-Login email stored in localStorage
     if (!authUser) {
         const email = localStorage.getItem('demo_auth_user_email');
         if (email) {
-            const defaultProfiles = await this.getProfiles();
-            const found = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === email.toLowerCase());
-            if (found) return found;
+            const core = CORE_ACCOUNTS.find(a => a.email?.toLowerCase() === email.toLowerCase());
+            if (core) return { ...core, user_id: email, created_at: new Date().toISOString() } as unknown as Profile;
         }
         return null;
     }
@@ -46,30 +56,22 @@ export const authService = {
       .single()
     
     if (error || !profile) {
-        // SMART RECOVERY: If profile is missing in DB, check for organizational defaults
-        const defaultProfiles = await this.getProfiles(); // This gets the defaults
-        const fallback = defaultProfiles.find((p: Profile) => p.email.toLowerCase() === authUser.email?.toLowerCase());
+        // SMART RECOVERY: Use CORE_ACCOUNTS (always available, never queries empty DB)
+        const core = CORE_ACCOUNTS.find(a => a.email?.toLowerCase() === authUser.email?.toLowerCase());
         
-        if (fallback) {
+        if (core) {
             console.log("Smart Recovery: Auto-provisioning profile for", authUser.email);
-            const newProfileData = {
-                ...fallback,
-                id: authUser.id,
-                email: authUser.email,
-                is_active: true
-            };
-            delete (newProfileData as any).user_id; // prevent collision with DB 'id'
+            const newProfileData = { ...core, id: authUser.id, email: authUser.email }
+            delete (newProfileData as any).user_id
             
-            // Try to create the profile in the cloud database
             try {
                 const { data: created } = await supabase.from('profiles').insert([newProfileData]).select().single();
                 if (created) return { ...created, user_id: created.id } as Profile;
             } catch (e) {
-                console.error("Auto-provisioning failed:", e);
+                console.error("DB insert failed, using session fallback:", e);
             }
-            
-            // Temporary session fallback if DB insert fails
-            return { ...fallback, user_id: authUser.id } as Profile;
+            // Always return the core profile as a session fallback — never show "User / Role"
+            return { ...core, user_id: authUser.id, email: authUser.email, created_at: new Date().toISOString() } as unknown as Profile;
         }
         return null;
     }
