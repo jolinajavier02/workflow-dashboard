@@ -22,26 +22,13 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  const doLogin = async (loginEmail: string) => {
+  const doLogin = async (loginEmail: string, loginPassword?: string) => {
     setLoading(true)
     try {
-      if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
-        const result = (await authService.login(loginEmail)) as any
-        toast.success(`Logged in as ${result.name || loginEmail}`)
-        router.push('/dashboard/pipeline')
-        return
-      }
-
-      // Live mode: match against CORE_ACCOUNTS and store session in localStorage
-      const match = QUICK_LOGINS.find(a => a.email.toLowerCase() === loginEmail.toLowerCase())
-      if (!match) {
-        toast.error('Account not recognized. Use one of the listed emails.')
-        return
-      }
-
-      // Store email so getUserProfile can find the correct role via CORE_ACCOUNTS
-      localStorage.setItem('demo_auth_user_email', match.email)
-      toast.success(`Welcome! Logged in as ${match.label}`)
+      // Regardless of placeholder or live, use the auth service which now handles both
+      const result = await authService.login(loginEmail, loginPassword) as any
+      
+      toast.success(`Welcome! Logged in as ${result.name || result.role}`)
       router.push('/dashboard/pipeline')
     } catch (error: any) {
       toast.error(error.message || 'Error signing in')
@@ -52,7 +39,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    await doLogin(email)
+    await doLogin(email, password)
   }
 
   return (
