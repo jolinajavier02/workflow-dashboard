@@ -12,7 +12,6 @@ interface CreateLeadModalProps {
 
 export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLeadModalProps) {
   const [formData, setFormData] = useState({
-    lead_id_input: '',
     client_name: '',
     phone_number: '',
     email_address: '',
@@ -56,8 +55,7 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
     try {
       if (!formData.client_name || !formData.company_name) return
       
-      const { 
-          lead_id_input, 
+      const {  
           formulation_details, 
           packaging_details, 
           whatsapp_number, 
@@ -74,22 +72,25 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
       // We seamlessly encode them into the globally supported 'requirement_details' column.
       const richRequirementDetails = `${formData.requirement_details}
 
---- TECHNICAL SPECS ---
+Contact Information:
 Phone: ${phone_number || 'N/A'}
 Email: ${email_address || 'N/A'}
+WhatsApp: ${whatsapp_number || 'N/A'}
+Role: ${contact_role_category}
+
+Technical Specifications:
 Formulation: ${formulation_details || 'N/A'}
 Packaging: ${packaging_details || 'N/A'}
-WhatsApp: ${whatsapp_number || 'N/A'}
-Role Category: ${contact_role_category}
-Lead Source: ${lead_source}
+
+Project Properties:
+Source: ${lead_source}
 Priority: ${priority}
 Image Attached: ${requirement_brief ? 'Yes (Local Only)' : 'No'}
 `
 
       await onSubmit({
           ...cleanFormData,
-          requirement_details: richRequirementDetails,
-          lead_id: lead_id_input ? parseInt(lead_id_input) : Math.floor(Math.random() * 10000)
+          requirement_details: richRequirementDetails
       })
       handleResetAndClose()
     } finally {
@@ -99,7 +100,6 @@ Image Attached: ${requirement_brief ? 'Yes (Local Only)' : 'No'}
 
   const handleResetAndClose = () => {
     setFormData({
-        lead_id_input: '',
         client_name: '', phone_number: '', email_address: '', whatsapp_number: '',
         company_name: '', contact_role_category: 'owner', 
         lead_source: 'Website', priority: 'medium',
@@ -140,16 +140,12 @@ Image Attached: ${requirement_brief ? 'Yes (Local Only)' : 'No'}
                           <span className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs">01</span>
                           <h3 className="font-black text-slate-900 uppercase tracking-widest text-[11px]">Primary Identity</h3>
                       </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8 bg-slate-50/50 rounded-[32px] border border-slate-100/50">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-8 bg-slate-50/50 rounded-[32px] border border-slate-100/50">
                           <div className="space-y-2">
-                              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Key size={10} className="text-blue-500" /> Manual Lead ID</label>
-                              <input value={formData.lead_id_input} onChange={e => setFormData({...formData, lead_id_input: e.target.value})} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Enter ID (Optional)" />
-                          </div>
-                          <div className="space-y-2 md:col-span-1">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><User size={10}/> Client Name *</label>
                               <input required value={formData.client_name} onChange={e => setFormData({...formData, client_name: e.target.value})} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Full Name" />
                           </div>
-                          <div className="space-y-2 md:col-span-1">
+                          <div className="space-y-2">
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Briefcase size={10}/> Company Name *</label>
                               <input required value={formData.company_name} onChange={e => setFormData({...formData, company_name: e.target.value})} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold outline-none focus:ring-2 focus:ring-blue-500/20 transition-all" placeholder="Legal Entity" />
                           </div>
