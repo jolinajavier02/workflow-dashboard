@@ -33,7 +33,8 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
       'slate': 'bg-slate-400',
   }
 
-  const formattedTime = lead.last_viewed_at ? format(parseISO(lead.last_viewed_at), 'MM/dd/yy HH:mm') : '--/--/-- --:--'
+  const timeSource = lead.updated_at || lead.created_at || lead.last_viewed_at;
+  const formattedTime = timeSource ? format(parseISO(timeSource), 'MM/dd/yy HH:mm') : '--/--/-- --:--'
 
   let displayStage = 1;
   const stageVal = lead.current_stage;
