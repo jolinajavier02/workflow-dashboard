@@ -56,9 +56,35 @@ export default function CreateLeadModal({ isOpen, onClose, onSubmit }: CreateLea
     try {
       if (!formData.client_name || !formData.company_name) return
       
-      const { lead_id_input, ...cleanFormData } = formData
+      const { 
+          lead_id_input, 
+          formulation_details, 
+          packaging_details, 
+          whatsapp_number, 
+          contact_role_category, 
+          priority, 
+          lead_source, 
+          requirement_brief, 
+          ...cleanFormData 
+      } = formData
+
+      // The live database does not have these new columns natively yet.
+      // We seamlessly encode them into the globally supported 'requirement_details' column.
+      const richRequirementDetails = `${formData.requirement_details}
+
+--- TECHNICAL SPECS ---
+Formulation: ${formulation_details || 'N/A'}
+Packaging: ${packaging_details || 'N/A'}
+WhatsApp: ${whatsapp_number || 'N/A'}
+Role Category: ${contact_role_category}
+Lead Source: ${lead_source}
+Priority: ${priority}
+Image Attached: ${requirement_brief ? 'Yes (Local Only)' : 'No'}
+`
+
       await onSubmit({
           ...cleanFormData,
+          requirement_details: richRequirementDetails,
           lead_id: lead_id_input ? parseInt(lead_id_input) : Math.floor(Math.random() * 10000)
       })
       handleResetAndClose()
