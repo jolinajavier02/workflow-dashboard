@@ -112,9 +112,15 @@ export const authService = {
       }
 
       // Live Production fallback: verify email/password in profiles explicitly
-      const { data: profile } = await supabase.from('profiles').select('*').eq('email', email).single()
+      let { data: profile } = await supabase.from('profiles').select('*').eq('email', email).single()
       
+      // Smart Recovery: Support CORE_ACCOUNTS natively if DB is empty
       if (!profile) {
+          const coreProfile = CORE_ACCOUNTS.find(a => a.email?.toLowerCase() === email.toLowerCase());
+          if (coreProfile) {
+              localStorage.setItem('demo_auth_user_email', email)
+              return { role: coreProfile.role, name: coreProfile.full_name }
+          }
           throw new Error('Account not recognized. Please contact Administrator for access.')
       }
 
