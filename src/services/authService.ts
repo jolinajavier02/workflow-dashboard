@@ -267,18 +267,21 @@ export const authService = {
   async deleteProfile(userId: string | number) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
-        const filtered = profiles.filter((p: any) => p.user_id !== userId && p.email !== userId)
-        localStorage.setItem('demo_profiles_v2', JSON.stringify(filtered))
+        const idx = profiles.findIndex((p: any) => p.user_id === userId || p.email === userId)
+        if (idx > -1) {
+            profiles[idx].is_active = false;
+            localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
+        }
         
         const currentUser = await this.getUserProfile()
         if (currentUser) {
-            await activityService.log(currentUser, 'Delete Account', `Administrator permanently removed account with ID: ${userId}`)
-            await notificationService.notifyAdmins('Account Permanently Deleted', `User account ${userId} was removed from the system by ${currentUser.full_name}`, 'ERROR')
+            await activityService.log(currentUser, 'Purge Account', `Administrator marked account ${userId} as DELETED.`)
+            await notificationService.notifyAdmins('Account Deactivated', `User account ${userId} has been archived in the Deleted vault.`, 'WARNING')
         }
         return
     }
 
-    const { error } = await supabase.from('profiles').delete().eq('id', userId)
+    const { error } = await supabase.from('profiles').update({ is_active: false }).eq('id', userId)
     if (error) throw error
   }
 }
