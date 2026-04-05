@@ -80,15 +80,21 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
       }
   }
 
-  const getStatusColorClass = (status?: string) => {
-      switch(status) {
-          case 'YELLOW': return 'bg-amber-500 shadow-amber-200'
-          case 'RED': return 'bg-red-500 shadow-red-200'
-          case 'GREEN': return 'bg-emerald-500 shadow-emerald-200'
-          case 'BLUE': return 'bg-blue-500 shadow-blue-200'
-          default: return 'bg-slate-400 shadow-slate-100'
-      }
-  }
+    const isRnDNode = userRole === 'RND_MANAGER' && lead.current_stage < 2;
+    const isPackagingNode = userRole === 'PACKAGING_MANAGER' && (lead.current_stage >= 2 && lead.current_stage < 4);
+    const isSalesNode = (userRole === 'SALES_MANAGER' || userRole === 'SALES_EXECUTIVE') && (lead.current_stage >= 4 && lead.current_stage < 9);
+    const isPMNode = userRole === 'PROJECT_MANAGER' && (lead.current_stage >= 9 && lead.current_stage < 14);
+    const isMyTurn = isRnDNode || isPackagingNode || isSalesNode || isPMNode;
+
+    const getStatusColorClass = (status?: string) => {
+        switch(status) {
+            case 'YELLOW': return 'bg-amber-500 shadow-amber-200'
+            case 'RED': return 'bg-red-500 shadow-red-200'
+            case 'GREEN': return 'bg-emerald-500 shadow-emerald-200'
+            case 'BLUE': return 'bg-blue-500 shadow-blue-200'
+            default: return 'bg-slate-400 shadow-slate-100'
+        }
+    }
 
   return (
     <div className="flex flex-col h-full bg-white animate-in slide-in-from-right duration-500 shadow-2xl overflow-hidden rounded-l-[40px] border-l border-slate-100 relative">
@@ -203,11 +209,12 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                 {/* Right Side: Action Console */}
                 <div className="sticky top-0 space-y-6">
                     <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-xl shadow-slate-200/50">
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
-                                <Send size={16} />
-                            </div>
+                        <div className="flex items-center justify-between mb-6">
                             <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Action Reporting</h4>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-slate-50 rounded-full border border-slate-100">
+                                <span className={cn("w-2 h-2 rounded-full bg-blue-500", isMyTurn && "animate-pulse")}></span>
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">{isMyTurn ? 'Your Turn' : 'Awaiting Cycle'}</span>
+                            </div>
                         </div>
                         <div className="space-y-4">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Message / Findings</label>
@@ -219,21 +226,33 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                                 <div className="flex gap-4">
                                     <button 
                                         onClick={() => handleActionSubmit('RED', 'TASK REJECTED: Technical specifications require re-negotiation or clarification in Follow-Up.')}
-                                        className="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-[24px] hover:bg-rose-100 transition-all text-[11px] uppercase tracking-widest border border-rose-100"
+                                        disabled={loading || !isMyTurn}
+                                        className={cn(
+                                            "flex-1 py-5 font-black rounded-[24px] transition-all text-[11px] uppercase tracking-widest border",
+                                            isMyTurn ? "bg-rose-50 text-rose-600 border-rose-100 hover:bg-rose-100" : "bg-slate-50 text-slate-400 border-slate-50 cursor-not-allowed"
+                                        )}
                                     >
-                                        Reject / Issue
+                                        Reject Action
                                     </button>
                                     <button 
                                         onClick={() => handleActionSubmit('GREEN', 'TASK APPROVED: Moving to next operational phase.')}
-                                        className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
+                                        disabled={loading || !isMyTurn}
+                                        className={cn(
+                                            "flex-[2] py-5 font-black rounded-[24px] transition-all shadow-xl text-[11px] uppercase tracking-widest",
+                                            isMyTurn ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] shadow-blue-100" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                        )}
                                     >
-                                        Approve & Move Forward
+                                        Approve & Forward
                                     </button>
                                 </div>
                             ) : (
                                 <button 
                                     onClick={() => handleActionSubmit('GREEN', 'Action Finalized: Approved and proceeding to next stage.')}
-                                    className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
+                                    disabled={loading || !isMyTurn}
+                                    className={cn(
+                                        "w-full py-5 font-black rounded-[24px] transition-all shadow-xl text-[11px] uppercase tracking-widest",
+                                        isMyTurn ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] shadow-blue-100" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                                    )}
                                 >
                                     Approved & Forward
                                 </button>

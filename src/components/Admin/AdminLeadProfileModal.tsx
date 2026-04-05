@@ -254,14 +254,11 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
                     <div className="bg-slate-900 rounded-[48px] p-10 shadow-2xl shadow-slate-900/40 border border-white/5 space-y-8 sticky top-0">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-4">
-                                <div className="w-10 h-10 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500 shadow-lg ring-1 ring-blue-500/20">
-                                    <Send size={20} />
-                                </div>
                                 <h4 className="text-sm font-black text-white uppercase tracking-widest">Operational Remarks</h4>
                             </div>
                             <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
                                 <span className={cn("w-2 h-2 rounded-full bg-blue-500", isMyTurn && "animate-pulse")}></span>
-                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Authorization Tier: {userProfile?.role}</span>
+                                <span className="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Status: {isMyTurn ? 'Your Turn' : 'Awaiting Cycle'}</span>
                             </div>
                         </div>
 
@@ -277,26 +274,35 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
                                 <div className="flex gap-6">
                                     <button 
                                         onClick={() => handleSubmit('RED')}
-                                        disabled={loading}
-                                        className="flex-1 py-6 bg-rose-500/10 text-rose-500 border border-rose-500/20 font-black rounded-3xl hover:bg-rose-500 hover:text-white transition-all text-xs uppercase tracking-widest shadow-lg"
+                                        disabled={loading || !isMyTurn}
+                                        className={cn(
+                                            "flex-1 py-6 font-black rounded-3xl transition-all text-xs uppercase tracking-widest shadow-lg border",
+                                            isMyTurn ? "bg-rose-500/10 text-rose-500 border-rose-500/20 hover:bg-rose-500 hover:text-white" : "bg-white/5 text-slate-600 border-white/5 cursor-not-allowed"
+                                        )}
                                     >
                                         Reject Action
                                     </button>
                                     <button 
                                         onClick={() => handleSubmit('GREEN')}
-                                        disabled={loading}
-                                        className="flex-[2] py-6 bg-blue-600 text-white font-black rounded-3xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-500/30 text-xs uppercase tracking-widest flex items-center justify-center gap-3"
+                                        disabled={loading || !isMyTurn}
+                                        className={cn(
+                                            "flex-[2] py-6 font-black rounded-3xl transition-all shadow-xl text-xs uppercase tracking-widest flex items-center justify-center gap-3",
+                                            isMyTurn ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] shadow-blue-500/30" : "bg-white/10 text-slate-500 cursor-not-allowed"
+                                        )}
                                     >
-                                        <CheckIcon size={20} /> Approve & Forward
+                                        Approve & Forward
                                     </button>
                                 </div>
                             ) : (
                                 <button 
                                     onClick={() => handleSubmit('GREEN')}
-                                    disabled={loading}
-                                    className="w-full py-7 bg-blue-600 text-white font-black rounded-[32px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-500/30 text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4"
+                                    disabled={loading || !isMyTurn}
+                                    className={cn(
+                                        "w-full py-7 font-black rounded-[32px] transition-all shadow-xl text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-4",
+                                        isMyTurn ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98] shadow-blue-500/30" : "bg-white/10 text-slate-500 cursor-not-allowed"
+                                    )}
                                 >
-                                    <Zap size={24} className="fill-white" /> Approved & Forward
+                                    Approved & Forward
                                 </button>
                             )}
                         </div>
