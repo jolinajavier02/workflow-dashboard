@@ -63,9 +63,9 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
                     if (stageVal < 2) return <span className="flex items-center text-slate-600 bg-slate-100 px-2 py-1 rounded uppercase tracking-widest border border-slate-200 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> R&D</span>;
                     if (stageVal >= 2 && stageVal < 4) return <span className="flex items-center text-purple-600 bg-purple-50 px-2 py-1 rounded uppercase tracking-widest border border-purple-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> Packaging</span>;
                     if (stageVal >= 4 && stageVal < 9) return <span className="flex items-center text-orange-600 bg-orange-50 px-2 py-1 rounded uppercase tracking-widest border border-orange-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> Sales</span>;
-                    if (stageVal >= 9 && stageVal < 14) return <span className="flex items-center text-teal-600 bg-teal-50 px-2 py-1 rounded uppercase tracking-widest border border-teal-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> Proj Manager</span>;
+                    if (stageVal >= 9 && stageVal < 14) return <span className="flex items-center text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-widest border border-blue-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> Proj Manager</span>;
                     if (stageVal >= 14 && stageVal <= 16) return <span className="flex items-center text-rose-600 bg-rose-50 px-2 py-1 rounded uppercase tracking-widest border border-rose-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]"><RoleIcon/> Admin</span>;
-                    if (stageVal >= 17) return <span className="flex items-center text-blue-600 bg-blue-50 px-2 py-1 rounded uppercase tracking-widest border border-blue-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.03)]"><RoleIcon/> Completed</span>;
+                    if (stageVal >= 17) return <span className="flex items-center text-emerald-600 bg-emerald-50 px-2 py-1 rounded uppercase tracking-widest border border-emerald-100 shadow-[inset_0_1px_4px_rgba(0,0,0,0.03)]"><RoleIcon/> Completed</span>;
                     return null;
                 })()}
         </div>
