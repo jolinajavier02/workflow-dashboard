@@ -76,8 +76,8 @@ export function useLeads(userProfile: Profile | null) {
           
           if (userProfile) {
             await activityService.log(userProfile, 'Enrolled Lead', `Manual ID ${newMockLead.lead_id} registered for ${newMockLead.client_name}`, newMockLead.id)
-            await notificationService.notifyAdmins('Lead Enrolled', `New lead LD-${newMockLead.lead_id} for ${newMockLead.client_name} is now in the pipeline.`, 'LEAD')
-            await notificationService.notifyRole('RND_MANAGER', 'New Assignment', `Lead LD-${newMockLead.lead_id} is awaiting technical briefing.`, 'WARNING')
+            await notificationService.notifyAdmins('Lead Enrolled', `New lead LD - ${newMockLead.lead_id.toString().padStart(6, '0')} for ${newMockLead.client_name} is now in the pipeline.`, 'LEAD')
+            await notificationService.notifyRole('RND_MANAGER', 'New Assignment', `Lead LD - ${newMockLead.lead_id.toString().padStart(6, '0')} is awaiting technical briefing.`, 'WARNING')
           }
 
           fetchLeads()
@@ -92,22 +92,22 @@ export function useLeads(userProfile: Profile | null) {
           await activityService.log(
               userProfile, 
               'Enrolled Lead', 
-              `Registered global lead LD-${newLead.lead_id} for ${newLead.client_name}`
+              `Registered global lead LD - ${newLead.lead_id.toString().padStart(6, '0')} for ${newLead.client_name}`
           )
           
           // Notify Global Overseers (Admins, Owners, Directors)
           await notificationService.notifyAdmins(
               'Global Lead Enrolled', 
-              `New cloud lead LD-${newLead.lead_id} entered from ${userProfile.full_name}`, 
+              `New cloud lead LD - ${newLead.lead_id.toString().padStart(6, '0')} entered from ${userProfile.full_name}`, 
               'LEAD'
           )
-          await notificationService.notifyRole('SALES_MANAGER', 'Sales Pipeline Update', `New lead LD-${newLead.lead_id} successfully entered the pipeline from ${userProfile.full_name}.`, 'INFO')
+          await notificationService.notifyRole('SALES_MANAGER', 'Sales Pipeline Update', `New lead LD - ${newLead.lead_id.toString().padStart(6, '0')} successfully entered the pipeline from ${userProfile.full_name}.`, 'INFO')
           
           // Notify the individual specifically assigned to approve/work on Stage 0
           await notificationService.notifyRole(
               'RND_MANAGER', 
               'New Assignment', 
-              `Lead LD-${newLead.lead_id} is awaiting your technical formulation briefing.`, 
+              `Lead LD - ${newLead.lead_id.toString().padStart(6, '0')} is awaiting your technical formulation briefing.`, 
               'WARNING'
           )
       }

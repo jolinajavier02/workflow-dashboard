@@ -68,7 +68,7 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                 <span className="px-2.5 py-1 bg-slate-800 rounded-md text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">LD-{lead.lead_id}</span>
+                 <span className="px-2.5 py-1 bg-slate-800 rounded-md text-[10px] font-black text-blue-400 uppercase tracking-widest leading-none">LD - {lead.lead_id.toString().padStart(6, '0')}</span>
                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{lead.company_name}</span>
               </div>
               <h2 className="text-3xl font-black tracking-tight">{lead.client_name}</h2>

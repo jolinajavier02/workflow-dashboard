@@ -193,17 +193,17 @@ export default function PipelinePage() {
                     )
 
                     // Notifications logic...
-                    await notificationService.notifyAdmins('Lead Transmitted', `Lead LD-${lead.lead_id} moved to ${stageName} by ${userProfile.full_name}`, 'INFO')
+                    await notificationService.notifyAdmins('Lead Transmitted', `Lead LD - ${lead.lead_id.toString().padStart(6, '0')} moved to ${stageName} by ${userProfile.full_name}`, 'INFO')
 
                     if (status === 'PM_FOLLOW_UP') {
-                        await notificationService.notifyAdmins('ACTION REQUIRED: Follow-Up', `Project Manager flagged Lead LD-${lead.lead_id} for mandatory follow-up.`, 'ERROR')
+                        await notificationService.notifyAdmins('ACTION REQUIRED: Follow-Up', `Project Manager flagged Lead LD - ${lead.lead_id.toString().padStart(6, '0')} for mandatory follow-up.`, 'ERROR')
                     } else {
                         if (userProfile.role === 'RND_MANAGER') {
-                            await notificationService.notifyRole('PACKAGING_MANAGER', 'Lead Assigned', `Lead LD-${lead.lead_id} has been approved by R&D and assigned to your Packaging team.`, 'WARNING')
+                            await notificationService.notifyRole('PACKAGING_MANAGER', 'Lead Assigned', `Lead LD - ${lead.lead_id.toString().padStart(6, '0')} has been approved by R&D and assigned to your Packaging team.`, 'WARNING')
                         } else if (userProfile.role === 'PACKAGING_MANAGER') {
-                            await notificationService.notifyRole('SALES_MANAGER', 'Lead Ready', `Lead LD-${lead.lead_id} packaging completed. Ready for Sales processing.`, 'SUCCESS')
+                            await notificationService.notifyRole('SALES_MANAGER', 'Lead Ready', `Lead LD - ${lead.lead_id.toString().padStart(6, '0')} packaging completed. Ready for Sales processing.`, 'SUCCESS')
                         } else if (userProfile.role === 'SALES_MANAGER' || userProfile.role === 'SALES_EXECUTIVE') {
-                            await notificationService.notifyRole('PROJECT_MANAGER', 'Project Received', `Lead LD-${lead.lead_id} dispatched to Project Management.`, 'INFO')
+                            await notificationService.notifyRole('PROJECT_MANAGER', 'Project Received', `Lead LD - ${lead.lead_id.toString().padStart(6, '0')} dispatched to Project Management.`, 'INFO')
                         }
                     }
                 }

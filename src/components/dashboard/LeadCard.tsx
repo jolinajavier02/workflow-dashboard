@@ -55,7 +55,7 @@ export default function LeadCard({ lead, color, onClick }: { lead: Lead, color: 
     >
       <div className="flex justify-between items-start mb-3">
         <div className="px-2 py-0.5 bg-slate-900 rounded text-[10px] font-black text-white tracking-widest leading-none flex items-center">
-          LD-{lead.lead_id}
+          LD - {lead.lead_id.toString().padStart(6, '0')}
         </div>
         <div className="flex items-center gap-1.5 text-[9px] font-black">
                 {(() => {

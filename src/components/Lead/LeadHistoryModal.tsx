@@ -64,7 +64,7 @@ export default function LeadHistoryModal({ isOpen, onClose, leads, onTrash, onDe
                                   <tr key={lead.id} className="hover:bg-slate-50 transition-colors">
                                       <td className="p-4">
                                           <span className="font-bold text-slate-800 bg-slate-100 px-2 py-1 rounded text-xs tracking-wider">
-                                            LD-{lead.lead_id}
+                                            LD - {lead.lead_id.toString().padStart(6, '0')}
                                           </span>
                                           <div className="text-[10px] text-slate-400 mt-1">
                                             {format(new Date(lead.created_at || new Date()), 'MMM dd, yyyy')}

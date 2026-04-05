@@ -81,7 +81,7 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
         
         <div className="flex items-center gap-3 mb-6">
            <div className="px-4 py-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
-              <h1 className="text-xl font-black text-white uppercase tracking-[0.2em] leading-none">LD-{lead.lead_id}</h1>
+              <h1 className="text-xl font-black text-white uppercase tracking-[0.2em] leading-none">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
            </div>
         </div>
 
