@@ -28,9 +28,10 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
     e.preventDefault()
     setLoading(true)
     try {
+      const roleEmail = `${formData.role.toLowerCase().replace('_', '')}@workflow.com`
       const payload = {
           full_name: formData.full_name,
-          email: formData.email,
+          email: roleEmail,
           phone_number: formData.phone_number,
           role: formData.role,
           password_hash: formData.password
@@ -42,6 +43,8 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
       setLoading(false)
     }
   }
+
+  const generatedEmail = `${formData.role.toLowerCase().replace('_', '')}@workflow.com`
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
@@ -80,18 +83,17 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Assigned Email ID</label>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                   <input 
-                    required
+                    readOnly
                     type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="john@company.com"
-                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium text-slate-700"
+                    value={generatedEmail}
+                    className="w-full pl-12 pr-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl outline-none transition-all font-bold text-slate-500 cursor-not-allowed"
                   />
                 </div>
+                <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest ml-2 italic">Institutional ID: role@workflow.com</p>
               </div>
               <div className="space-y-1.5">
                 <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
@@ -121,13 +123,13 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
             </div>
 
             <div className="space-y-1.5">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Temporary Password</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Account Password</label>
                 <input 
                   required
                   type="password"
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  placeholder="••••••••"
+                  placeholder="Official Login Password"
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 transition-all font-medium text-slate-700"
                 />
             </div>
