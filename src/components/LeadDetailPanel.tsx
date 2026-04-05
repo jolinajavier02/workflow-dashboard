@@ -142,8 +142,13 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                     const isPast = lead.current_stage > stage.number
                     return (
                         <div key={idx} className="flex items-center gap-5 group">
-                            <div className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 border border-slate-100 shadow-sm text-slate-400">
-                                <Info size={16} />
+                            <div className={cn(
+                                "flex items-center justify-center w-10 h-10 rounded-full border shadow-sm transition-all",
+                                isPast ? "bg-emerald-500 border-emerald-600 text-white" :
+                                isCurrent ? "bg-blue-50 border-blue-200 text-blue-600 shadow-blue-100" :
+                                "bg-slate-50 border-slate-100 text-slate-300"
+                            )}>
+                                {isPast ? <CheckCircle2 size={16} /> : <Info size={16} />}
                             </div>
                             <div className="relative flex items-center flex-1">
                                 <div className={cn(
