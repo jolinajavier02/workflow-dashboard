@@ -105,8 +105,9 @@ export default function LeadActionModal({ isOpen, onClose, lead, userProfile, on
                         </div>
                     )
                 ) : (
-                    <div className="w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl flex items-center justify-center text-slate-300">
-                        <Paperclip size={24} />
+                    <div className="w-full h-48 bg-slate-50 border-2 border-dashed border-slate-100 rounded-3xl flex flex-col items-center justify-center text-slate-300 gap-3 opacity-60">
+                        <Package size={32} className="text-slate-200" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">No Image Attached</span>
                     </div>
                 )}
             </div>
