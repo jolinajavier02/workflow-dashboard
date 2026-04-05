@@ -44,6 +44,9 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
 
   const isImage = (url?: string) => url && (/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url) || url.startsWith('data:image/'))
 
+  const isSales = userProfile?.role === 'SALES_MANAGER' || userProfile?.role === 'SALES_EXECUTIVE'
+  const isPrivileged = userProfile?.role === 'ADMIN' || userProfile?.role === 'OWNER' || isSales
+
   const isPM = userProfile?.role === 'PROJECT_MANAGER'
   const isRnDNode = userProfile?.role === 'RND_MANAGER' && lead.current_stage < 2;
   const isPackagingNode = userProfile?.role === 'PACKAGING_MANAGER' && lead.current_stage >= 2 && lead.current_stage < 4;
@@ -76,47 +79,67 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
       <div className="bg-[#0f172a] px-10 py-8 text-white relative shrink-0 border-b border-white/5">
         <button onClick={onClose} className="absolute top-8 right-10 text-slate-500 hover:text-white transition-all"><XIcon size={24} /></button>
         
-        <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-3 mb-6">
            <div className="px-4 py-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
               <h1 className="text-xl font-black text-white uppercase tracking-[0.2em] leading-none">LD-{lead.lead_id}</h1>
            </div>
         </div>
 
-        <h2 className="text-5xl font-black tracking-tight mb-8 text-slate-100">Lead Profile</h2>
-        
-        <div className="flex items-center gap-6 flex-wrap mt-2">
-           <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-              <BuildingIcon size={16} className="text-blue-500"/>
-              <span>{lead.company_name}</span>
+        <div className="flex flex-col gap-6">
+           <div className="flex items-end gap-6 flex-wrap">
+              <h2 className="text-5xl font-black tracking-tight text-slate-100">{lead.client_name}</h2>
+              <div className="flex items-center gap-2 mb-2 px-3 py-1 bg-white/5 border border-white/10 rounded-lg">
+                 <BuildingIcon size={16} className="text-blue-500"/>
+                 <span className="text-sm font-bold text-slate-400">{lead.company_name}</span>
+              </div>
            </div>
-           <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-           <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-              <UserIcon size={16} className="text-slate-500"/>
-              <span>{lead.client_name}</span>
-           </div>
-           {lead.phone_number && (
-             <>
-               <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-                <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-                   <PhoneIcon size={14} className="text-slate-500"/>
-                   <span>{lead.phone_number}</span>
+
+           {isPrivileged && (
+             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-6 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-sm animate-in slide-in-from-top-2 duration-500">
+                <div className="space-y-1">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><MailIcon size={10}/> Business Email</p>
+                   <p className="text-xs font-bold text-slate-200 truncate">{lead.email_address || 'Unlisted'}</p>
                 </div>
-             </>
-           )}
-           {lead.email_address && (
-             <>
-               <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-                <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-                   <MailIcon size={14} className="text-slate-500"/>
-                   <span>{lead.email_address}</span>
+                <div className="space-y-1">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5"><PhoneIcon size={10}/> Phone Support</p>
+                   <p className="text-xs font-bold text-slate-200">{lead.phone_number || 'Unlisted'}</p>
                 </div>
-             </>
+                <div className="space-y-1">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 flex items-center"><PhoneIcon size={10} className="text-emerald-500"/> WhatsApp</p>
+                   <p className="text-xs font-bold text-slate-200">{lead.whatsapp_number || 'Internal Use Only'}</p>
+                </div>
+                <div className="space-y-1">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 flex items-center"><UserIcon size={10}/> Role Category</p>
+                   <p className="text-xs font-bold text-blue-400 uppercase tracking-tighter">{lead.contact_role_category || 'Stakeholder'}</p>
+                </div>
+                <div className="space-y-1">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 flex items-center"><BuildingIcon size={10}/> Origin Source</p>
+                   <p className="text-xs font-bold text-slate-200 uppercase tracking-tighter">{lead.lead_source || 'Inbound'}</p>
+                </div>
+                <div className="space-y-1 border-l border-white/10 pl-4">
+                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 flex items-center"><AlertTriangleIcon size={10}/> SLA Priority</p>
+                   <span className={cn(
+                       "text-[10px] font-black uppercase px-2 py-0.5 rounded-md",
+                       lead.priority === 'high' ? "bg-rose-500/20 text-rose-500" : 
+                       lead.priority === 'low' ? "bg-slate-500/20 text-slate-400" : 
+                       "bg-amber-500/20 text-amber-500"
+                   )}>{lead.priority}</span>
+                </div>
+             </div>
            )}
-           <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-           <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-              <EyeIcon size={14} className="text-emerald-500"/>
-              <span className="opacity-60">LAST VIEWED BY:</span>
-              <span className="text-slate-300 ml-1">{lead.last_viewed_by || 'ADMIN SYSTEM'}</span>
+
+           <div className="flex items-center gap-6 flex-wrap opacity-60">
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                 <EyeIcon size={14} className="text-emerald-500"/>
+                 <span>LAST VIEWED BY:</span>
+                 <span className="text-slate-300 ml-1">{lead.last_viewed_by || 'ADMIN SYSTEM'}</span>
+              </div>
+              <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+                 <ClockIcon size={14} className="text-blue-500"/>
+                 <span>SYSTEM TIMESTAMP:</span>
+                 <span className="text-slate-300 ml-1">{lead.updated_at ? new Date(lead.updated_at).toLocaleString() : '--'}</span>
+              </div>
            </div>
         </div>
       </div>
