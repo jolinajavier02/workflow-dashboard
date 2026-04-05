@@ -108,8 +108,9 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
         </div>
 
         <div className="pr-20">
-            <div className="flex items-center gap-3 mb-4">
-                <h1 className="px-4 py-2 bg-blue-600 text-white text-xs font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-blue-500/20">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
+            <h2 className="text-4xl font-black tracking-tighter leading-none mb-4">{isPrivileged ? lead.client_name : 'Lead Profile'}</h2>
+            <div className="flex items-center gap-3 mb-6">
+                <h1 className="px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-blue-500/20">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
                 <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-lg">
                     <div className={cn("w-2 h-2 rounded-full", getStatusColorClass(lead.color_status))}></div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
@@ -117,7 +118,6 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                     </span>
                 </div>
             </div>
-            <h2 className="text-4xl font-black tracking-tighter leading-none mb-3">{isPrivileged ? lead.client_name : 'Lead Profile'}</h2>
             <div className="flex flex-wrap items-center gap-4 text-slate-400 text-sm font-medium">
                 <span className="flex items-center gap-1.5"><Building2 size={14} className="text-blue-500" /> {lead.company_name}</span>
                 <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
