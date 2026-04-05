@@ -238,9 +238,9 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                         </div>
                     )
                 ) : (
-                    <div className="h-64 flex flex-col items-center justify-center bg-slate-50 border-4 border-dashed border-slate-100 m-6 rounded-[32px]">
-                        <Package size={48} className="text-slate-200 mb-4" />
-                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No Digital Assets Provided</p>
+                    <div className="h-64 flex flex-col items-center justify-center bg-slate-50 border-4 border-dashed border-slate-100 m-6 rounded-[32px] opacity-50">
+                        <Package size={48} className="text-slate-300 mb-4" />
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No Image Attached</p>
                     </div>
                 )}
             </div>

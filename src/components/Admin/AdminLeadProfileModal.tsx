@@ -207,7 +207,7 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
          </div>
 
          {/* RIGHT COLUMN: Requirements + Packing + Image */}
-         <div className="flex-1 flex flex-col p-10 space-y-10 overflow-hidden">
+         <div className="flex-1 flex flex-col p-10 space-y-10 overflow-y-auto scrollbar-hide">
             <div className="grid grid-cols-2 gap-8 shrink-0">
                 <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-sm">
                     <div className="flex items-center gap-3 mb-6">
@@ -258,9 +258,9 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
                             </div>
                         )
                     ) : (
-                        <div className="flex flex-col items-center gap-4 opacity-10 grayscale">
+                        <div className="flex flex-col items-center gap-4 opacity-30 grayscale my-10">
                            <PackageIcon size={64} />
-                           <p className="text-[10px] font-black uppercase tracking-widest">No Asset Provided</p>
+                           <p className="text-[10px] font-black uppercase tracking-widest">No Image Attached</p>
                         </div>
                     )}
                 </div>
