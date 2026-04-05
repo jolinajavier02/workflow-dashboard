@@ -8,12 +8,12 @@ import { authService } from '@/services/authService'
 
 // Core accounts for quick login (matches CORE_ACCOUNTS in authService)
 const QUICK_LOGINS = [
-  { email: 'admin@workflow.com',     label: 'Admin',    color: 'bg-blue-600' },
-  { email: 'owner@workflow.com',     label: 'Owner',    color: 'bg-slate-900' },
-  { email: 'sales@workflow.com',     label: 'Sales',    color: 'bg-emerald-600' },
-  { email: 'rnd@workflow.com',       label: 'R&D',      color: 'bg-purple-600' },
-  { email: 'packaging@workflow.com', label: 'Packaging', color: 'bg-amber-600' },
-  { email: 'project@workflow.com',   label: 'Project',  color: 'bg-teal-600' },
+  { email: 'owner@workflow.com',     pass: '001', label: 'Owner',      color: 'bg-slate-900' },
+  { email: 'admin@workflow.com',     pass: '002', label: 'Admin',      color: 'bg-blue-600' },
+  { email: 'r&dmanager@workflow.com', pass: '003', label: 'R&D',        color: 'bg-purple-600' },
+  { email: 'packagingmanager@workflow.com', pass: '004', label: 'Pkg',   color: 'bg-amber-600' },
+  { email: 'salesmanager@workflow.com',     pass: '005', label: 'Sales', color: 'bg-emerald-600' },
+  { email: 'projectmanager@workflow.com',   pass: '006', label: 'Project', color: 'bg-teal-600' },
 ]
 
 export default function LoginPage() {
@@ -59,7 +59,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@workflow.com" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-200" />
+                <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="role@workflow.com" className="w-full pl-10 pr-4 py-3 rounded-lg border border-slate-200 outline-none focus:ring-2 focus:ring-blue-200" />
               </div>
             </div>
             <div>
@@ -82,11 +82,11 @@ export default function LoginPage() {
               <Zap size={10} /> Quick Access
             </p>
             <div className="grid grid-cols-3 gap-2">
-              {QUICK_LOGINS.map(({ email: qEmail, label, color }) => (
+              {QUICK_LOGINS.map(({ email: qEmail, pass: qPass, label, color }) => (
                 <button
                   key={qEmail}
                   type="button"
-                  onClick={() => doLogin(qEmail)}
+                  onClick={() => doLogin(qEmail, qPass)}
                   disabled={loading}
                   className={`${color} text-white text-[10px] font-black uppercase tracking-widest py-2 px-1 rounded-lg hover:opacity-90 transition-all`}
                 >
