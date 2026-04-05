@@ -79,10 +79,9 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
       <div className="bg-[#0f172a] px-10 py-8 text-white relative shrink-0 border-b border-white/5">
         <button onClick={onClose} className="absolute top-8 right-10 text-slate-500 hover:text-white transition-all"><XIcon size={24} /></button>
         
-        <div className="flex items-center gap-3 mb-6">
-           <div className="px-4 py-2 bg-blue-600 rounded-xl shadow-lg shadow-blue-500/20">
-              <h1 className="text-xl font-black text-white uppercase tracking-[0.2em] leading-none">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
-           </div>
+        <div className="flex flex-col gap-1 mb-8">
+            <h1 className="text-4xl font-black text-white uppercase tracking-[0.2em] leading-tight">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
+            <h2 className="text-xs font-black text-blue-500 uppercase tracking-[0.4em] ml-1">Lead Profile</h2>
         </div>
 
         <div className="flex flex-col gap-6">
