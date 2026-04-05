@@ -209,20 +209,29 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                                 className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[24px] text-sm font-bold min-h-[220px] outline-none focus:ring-4 focus:ring-blue-100 transition-all resize-none"
                                 placeholder="Mandatory: Report your findings or confirm task completion for the next stage..."
                             />
-                            <div className="flex gap-4">
+                            {['RND_MANAGER', 'PROJECT_MANAGER'].includes(userRole!) ? (
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={() => handleActionSubmit('RED', 'TASK REJECTED: Technical specifications require re-negotiation or clarification in Follow-Up.')}
+                                        className="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-[24px] hover:bg-rose-100 transition-all text-[11px] uppercase tracking-widest border border-rose-100"
+                                    >
+                                        Reject / Issue
+                                    </button>
+                                    <button 
+                                        onClick={() => handleActionSubmit('GREEN', 'TASK APPROVED: Moving to next operational phase.')}
+                                        className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
+                                    >
+                                        Approve & Move Forward
+                                    </button>
+                                </div>
+                            ) : (
                                 <button 
-                                    onClick={() => handleActionSubmit('RED', 'TASK REJECTED: Technical specifications require re-negotiation or clarification in Follow-Up.')}
-                                    className="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-[24px] hover:bg-rose-100 transition-all text-[11px] uppercase tracking-widest border border-rose-100"
+                                    onClick={() => handleActionSubmit('GREEN', 'Action Finalized: Reporting findings and proceeding to next stage.')}
+                                    className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
                                 >
-                                    Reject / Issue
+                                    Finalize Action & Proceed
                                 </button>
-                                <button 
-                                    onClick={() => handleActionSubmit('GREEN', 'TASK APPROVED: Moving to next operational phase.')}
-                                    className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
-                                >
-                                    Approve & Move Forward
-                                </button>
-                            </div>
+                            )}
                         </div>
                         <div className="mt-8 pt-8 border-t border-slate-50">
                              <div className="flex items-center gap-3 text-slate-400">
