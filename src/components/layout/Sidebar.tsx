@@ -51,7 +51,13 @@ export default function Sidebar({ isOpen, userRole, userName, handleLogout }: Si
               )}
             >
               <item.icon size={20} className={cn(isActive ? "text-white" : "text-slate-400 group-hover:text-white")} />
-              {isOpen && <span className="font-medium">{item.name}</span>}
+              {isOpen && (
+                <span className="font-medium">
+                  {item.name === 'My Tasks' && (userRole === 'ADMIN' || userRole === 'OWNER') 
+                    ? 'Created Tasks' 
+                    : item.name}
+                </span>
+              )}
             </Link>
           )
         })}
