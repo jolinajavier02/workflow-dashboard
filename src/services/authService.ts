@@ -270,8 +270,14 @@ export const authService = {
         const idx = profiles.findIndex((p: any) => p.user_id === userId || p.email === userId)
         if (idx > -1) {
             profiles[idx].is_active = false;
-            localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
+        } else {
+            // Smart Deletion: If not in DB, it might be a hardcoded CORE_ACCOUNT
+            const core = CORE_ACCOUNTS.find(c => c.email === userId || c.role === userId);
+            if (core) {
+                profiles.push({ ...core, user_id: core.email, is_active: false, created_at: new Date().toISOString() });
+            }
         }
+        localStorage.setItem('demo_profiles_v2', JSON.stringify(profiles))
         
         const currentUser = await this.getUserProfile()
         if (currentUser) {
