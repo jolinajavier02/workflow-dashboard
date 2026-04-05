@@ -135,14 +135,31 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
            <div className="flex items-center gap-8 flex-wrap opacity-80 pt-2">
               <div className="flex items-center gap-4">
                   <div className="flex -space-x-2">
-                      {Array.from(new Set(activities.map(a => a.user_name))).slice(0, 5).map((name, i) => (
-                          <div key={i} title={name} className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-blue-600 flex items-center justify-center text-[10px] font-black text-white shadow-lg ring-1 ring-white/5 uppercase">
-                              {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                          </div>
-                      ))}
-                      {Array.from(new Set(activities.map(a => a.user_name))).length > 5 && (
-                          <div className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-slate-800 flex items-center justify-center text-[8px] font-black text-white shadow-lg ring-1 ring-white/5">
-                              +{Array.from(new Set(activities.map(a => a.user_name))).length - 5}
+                      {(() => {
+                          const uniqueUsers = Array.from(new Map(activities.map(a => [a.user_name, a])).values());
+                          return uniqueUsers.slice(0, 7).map((user, i) => {
+                              const roleMap: Record<string, string> = {
+                                  'RND_MANAGER': 'RD',
+                                  'SALES_MANAGER': 'SM',
+                                  'SALES_EXECUTIVE': 'SM',
+                                  'PACKAGING_MANAGER': 'PK', // Using PK for packaging to distinguish from PM if needed, but user said 'PM packaging'
+                                  'PROJECT_MANAGER': 'PM',
+                                  'ADMIN': 'AD',
+                                  'OWNER': 'OM'
+                              };
+                              // User specifically said 'PM packaging' and 'PM project manager'
+                              const roleId = user.user_role === 'PACKAGING_MANAGER' ? 'PM' : (roleMap[user.user_role] || '??');
+                              
+                              return (
+                                  <div key={i} title={`${user.user_name} (${user.user_role})`} className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-blue-600 flex items-center justify-center text-[9px] font-black text-white shadow-lg ring-1 ring-white/5 uppercase">
+                                      {roleId}
+                                  </div>
+                              )
+                          });
+                      })()}
+                      {Array.from(new Set(activities.map(a => a.user_name))).length > 7 && (
+                          <div className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-slate-800 flex items-center justify-center text-[7px] font-black text-white shadow-lg ring-1 ring-white/5">
+                              +{Array.from(new Set(activities.map(a => a.user_name))).length - 7}
                           </div>
                       )}
                   </div>
