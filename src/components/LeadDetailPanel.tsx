@@ -53,13 +53,19 @@ export default function LeadDetailPanel({ leadId, onClose, userRole }: { leadId:
           // Mapping Colors to Stages as requested
           if (status === 'YELLOW') targetStage = 5   // In Progress
           if (status === 'RED')    targetStage = 16  // Follow Up
-          if (status === 'GREEN')  targetStage = 11  // Dispatch
+          if (status === 'GREEN') {
+              if (userRole === 'RND_MANAGER') targetStage = 6 // Move to Packaging
+              else if (userRole === 'PACKAGING_MANAGER') targetStage = 7 // Move to Sample Dispatched
+              else if (userRole === 'PROJECT_MANAGER') targetStage = 19 // Done
+              else targetStage = 11 // Default
+          }
           if (status === 'BLUE')   targetStage = 19  // Closing
           if (status === 'GRAY')   targetStage = 0   // New
 
           await updateLeadData({ 
               color_status: status,
-              current_stage: targetStage
+              current_stage: targetStage,
+              status: (status === 'GREEN' && userRole === 'PROJECT_MANAGER') ? 'closed' : 'active'
           })
 
           // Log the action with comment
@@ -203,18 +209,31 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                                 className="w-full p-6 bg-slate-50 border border-slate-100 rounded-[24px] text-sm font-bold min-h-[220px] outline-none focus:ring-4 focus:ring-blue-100 transition-all resize-none"
                                 placeholder="Mandatory: Report your findings or confirm task completion for the next stage..."
                             />
-                            <button 
-                                onClick={() => setIsActionModalOpen(true)}
-                                className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
-                            >
-                                Finalize Action & Proceed
-                            </button>
+                            <div className="flex gap-4">
+                                <button 
+                                    onClick={() => handleActionSubmit('RED', 'TASK REJECTED: Technical specifications require re-negotiation or clarification in Follow-Up.')}
+                                    className="flex-1 py-5 bg-rose-50 text-rose-600 font-black rounded-[24px] hover:bg-rose-100 transition-all text-[11px] uppercase tracking-widest border border-rose-100"
+                                >
+                                    Reject / Issue
+                                </button>
+                                <button 
+                                    onClick={() => handleActionSubmit('GREEN', 'TASK APPROVED: Moving to next operational phase.')}
+                                    className="flex-[2] py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
+                                >
+                                    Approve & Move Forward
+                                </button>
+                            </div>
                         </div>
                         <div className="mt-8 pt-8 border-t border-slate-50">
                              <div className="flex items-center gap-3 text-slate-400">
                                 <Clock size={14} />
-                                <span className="text-[10px] font-bold uppercase tracking-widest leading-none">Task Authorization: {userRole?.replace('_', ' ')}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest leading-none">Authorization Tier: {userRole?.replace('_', ' ')}</span>
                              </div>
+                             {(userRole === 'PROJECT_MANAGER' && lead.color_status === 'GREEN') && (
+                                 <div className="mt-4 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl font-black text-[10px] uppercase tracking-widest text-center border border-emerald-100 animate-pulse">
+                                     Lead Status: DONE
+                                 </div>
+                             )}
                         </div>
                     </div>
                 </div>
@@ -234,45 +253,46 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                         </div>
                     </div>
                     <div className="space-y-4">
-                        {STAGES.slice(0, 6).map((stage, idx) => {
-                            const isCurrent = lead.current_stage === stage.number
-                            const isPast = lead.current_stage > stage.number
+                        {(lead.current_stage === 16 && lead.color_status === 'RED' 
+                            ? STAGES.filter(s => s.number <= 2 || s.number === 6 || s.number === 16)
+                            : STAGES.slice(0, 6)
+                        ).map((statusStage, idx) => {
+                            const isCurrent = lead.current_stage === statusStage.number || (lead.current_stage === 16 && statusStage.number === 6 && lead.color_status === 'RED')
+                            const isPast = lead.current_stage > statusStage.number && !(lead.current_stage === 16 && statusStage.number === 6)
+                            const isRejectedMarker = lead.current_stage === 16 && statusStage.number === 6 && lead.color_status === 'RED'
+                            
                             return (
                                 <div key={idx} className="flex items-center gap-5 group">
                                     <div className={cn(
                                         "flex items-center justify-center w-10 h-10 rounded-full border shadow-sm transition-all",
+                                        isRejectedMarker ? "bg-rose-500 border-rose-600 text-white animate-pulse" :
                                         isPast ? "bg-emerald-500 border-emerald-600 text-white" :
                                         isCurrent ? "bg-blue-50 border-blue-200 text-blue-600 shadow-blue-100" :
                                         "bg-slate-50 border-slate-100 text-slate-400"
                                     )}>
-                                        {isPast ? <CheckCircle2 size={16} /> : <Info size={16} />}
+                                        {isRejectedMarker ? <X size={16} /> : isPast ? <CheckCircle2 size={16} /> : <Info size={16} />}
                                     </div>
                                     <div className="relative flex items-center flex-1">
                                         <div className={cn(
                                             "px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all flex items-center gap-3",
+                                            isRejectedMarker ? "bg-rose-600 border-rose-600 text-white shadow-xl shadow-rose-100" :
                                             isCurrent ? "bg-blue-600 border-blue-600 text-white shadow-xl shadow-blue-100" : 
                                             isPast ? "bg-emerald-50 border-emerald-100 text-emerald-600" : 
                                             "bg-white border-slate-200 text-slate-300"
                                         )}>
                                             <div className={cn("w-2 h-2 rounded-full", 
+                                                isRejectedMarker ? "bg-white" :
                                                 isCurrent ? "bg-white animate-pulse" : 
                                                 isPast ? "bg-emerald-500" : "bg-slate-200"
                                             )}></div>
-                                            Stage {stage.number}
+                                            Stage {statusStage.number}
                                         </div>
                                         <span className={cn(
                                             "ml-4 text-xs font-bold transition-all",
-                                            isCurrent ? "text-slate-900" : "text-slate-400"
+                                            isRejectedMarker ? "text-rose-600" : isCurrent ? "text-slate-900" : "text-slate-400"
                                         )}>
-                                            {stage.name}
+                                            {isRejectedMarker ? 'TECHNICAL REJECTION' : statusStage.name}
                                         </span>
-                                        {isCurrent && (
-                                            <div className="ml-auto flex items-center gap-2">
-                                                <span className="text-[9px] font-black text-blue-600 border border-blue-100 bg-blue-50 px-2 py-0.5 rounded-lg uppercase tracking-tighter shadow-sm">
-                                                    {stage.owner.replace('_', ' ')}
-                                                </span>
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             )
