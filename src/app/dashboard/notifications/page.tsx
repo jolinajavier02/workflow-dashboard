@@ -7,6 +7,7 @@ import { Search, Bell, Clock, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { notificationService, Notification } from '@/services/notificationService'
 import { useAuth } from '@/hooks/useAuth'
+import { cn } from '@/utils/cn'
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -111,18 +112,18 @@ export default function NotificationsPage() {
               className="group cursor-pointer relative"
             >
               <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-all"></div>
-              <div className={`p-6 md:p-8 rounded-[35px] border transition-all flex flex-col md:flex-row items-center gap-8 ${!notif.is_read ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-50/50 border-slate-100/50 grayscale opacity-60 hover:grayscale-0 hover:opacity-100'}`}>
+              <div className={`p-6 md:p-8 rounded-[35px] border transition-all flex flex-col md:flex-row items-center gap-8 ${!notif.is_read ? 'bg-white border-slate-200 shadow-sm' : 'bg-white/50 border-slate-100'}`}>
                 
                 {/* Visual indicator (optional but keep it simple as text list) */}
                 <div className="flex-1 space-y-2 text-center md:text-left">
                   <div className="flex items-center gap-3 justify-center md:justify-start">
-                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em] bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">{notif.type}</span>
-                    <h3 className={`text-lg tracking-tight ${notif.is_read ? 'font-bold text-slate-500' : 'font-black text-slate-900'}`}>
+                    <span className={cn("text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg border", !notif.is_read ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-slate-50 text-slate-500 border-slate-100")}>{notif.type}</span>
+                    <h3 className={cn("text-lg tracking-tight", !notif.is_read ? "font-black text-slate-900" : "font-bold text-slate-800")}>
                       {notif.title}
                     </h3>
                   </div>
                   
-                  <p className={`text-sm leading-relaxed max-w-2xl px-4 md:px-0 ${notif.is_read ? 'text-slate-400 font-medium' : 'text-slate-600 font-bold italic'}`}>
+                  <p className={cn("text-sm leading-relaxed max-w-2xl px-4 md:px-0", !notif.is_read ? "text-slate-600 font-bold italic" : "text-slate-500 font-medium")}>
                     {notif.message}
                   </p>
 
