@@ -211,14 +211,21 @@ export const authService = {
             
             const currentUser = await this.getUserProfile()
             if (currentUser) {
-                const action = value ? `Recovered/Unblocked` : `Restricted/Deleted`
+                const isBlocked = field === 'is_active' && value === false;
+                const isRestricted = field === 'is_restricted' && value === true;
+                const actionLabel = isBlocked ? 'Permanently Blocked/Deleted' : (isRestricted ? 'Restricted' : 'Restored/Unblocked');
+                
                 await activityService.log(
                     currentUser, 
                     'Security Override', 
                     `Admin explicitly changed ${field} to ${value} for ${profiles[idx].full_name}`
                 )
-                // Notify user specifically
-                await notificationService.notifyUser(userId, 'Security Alert', `Your account is now ${action} by an Administrator.`, 'WARNING')
+
+                // Notify User Specifically
+                await notificationService.notifyUser(userId, 'Security Status Alert', `Your account has been officially ${actionLabel} by an Administrator.`, isBlocked ? 'ERROR' : 'WARNING')
+                
+                // Notify Admins
+                await notificationService.notifyAdmins('Account Security Change', `Account state for ${profiles[idx].full_name} was modified to ${actionLabel} by ${currentUser.full_name}`, 'SECURITY')
             }
         }
         return
