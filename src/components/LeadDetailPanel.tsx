@@ -144,7 +144,7 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                     <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
                             <FlaskConical className="text-indigo-600" size={20} />
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scientific Regulation</h4>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Scientific Formula</h4>
                         </div>
                         <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-50 min-h-[120px] flex items-center">
                             <p className="text-sm text-slate-700 font-semibold leading-relaxed">
@@ -157,7 +157,7 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                     <div className="bg-white rounded-[40px] p-8 border border-slate-100 shadow-sm">
                         <div className="flex items-center gap-3 mb-6">
                             <Package className="text-emerald-600" size={20} />
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Requirement & Package</h4>
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Requirements & Packaging</h4>
                         </div>
                         <div className="space-y-4">
                             <p className="text-sm text-slate-800 font-black italic bg-emerald-50/50 p-6 rounded-3xl border border-emerald-100">
@@ -232,10 +232,10 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
                                 </div>
                             ) : (
                                 <button 
-                                    onClick={() => handleActionSubmit('GREEN', 'Action Finalized: Reporting findings and proceeding to next stage.')}
+                                    onClick={() => handleActionSubmit('GREEN', 'Action Finalized: Approved and proceeding to next stage.')}
                                     className="w-full py-5 bg-blue-600 text-white font-black rounded-[24px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-100 text-[11px] uppercase tracking-widest"
                                 >
-                                    Finalize Action & Proceed
+                                    Approved & Forward
                                 </button>
                             )}
                         </div>
