@@ -127,38 +127,32 @@ export default function PipelinePage() {
         onDeleteForever={deleteLeadForever} 
       />
 
-      {/* Role-Based Lead Profile Access */}
-      {!authLoading && selectedLeadId && (userRole === 'ADMIN' || userRole === 'OWNER') ? (
+      {/* Unified Lead Profile Modal (Global Standard) */}
+      {!authLoading && selectedLeadId && (
           <AdminLeadProfileModal 
-            isOpen={true}
-            onClose={() => setSelectedLeadId(null)}
-            lead={activeLeads.find(l => l.id === selectedLeadId)!}
-            onAction={async (action, comment) => {
-                if (action === 'REPROCESS') {
-                    const leadToUpdate = activeLeads.find(l => l.id === selectedLeadId)!
-                    await updateLead(leadToUpdate.id as any, { 
-                        current_stage: 2, // Reprocess to Briefing (R&D)
-                        last_viewed_by: userProfile?.full_name,
-                        last_viewed_at: new Date().toISOString()
-                    })
-
-                    if (userProfile) {
-                        await activityService.log(userProfile, 'Admin Override (Reprocessed)', comment, leadToUpdate.id)
-                    }
-
-                    setSelectedLeadId(null)
-                    fetchLeads()
-                }
-            }}
-          />
-      ) : !authLoading && selectedLeadId ? (
-          <LeadActionModal 
             isOpen={true}
             onClose={() => setSelectedLeadId(null)}
             lead={activeLeads.find(l => l.id === selectedLeadId)!}
             userProfile={userProfile}
             onAction={async (status, comment) => {
                 const lead = activeLeads.find(l => l.id === selectedLeadId)!
+
+                if (status === 'REPROCESS') {
+                    await updateLead(lead.id as any, { 
+                        current_stage: 2, // Reprocess to Briefing (R&D)
+                        last_viewed_by: userProfile?.full_name,
+                        last_viewed_at: new Date().toISOString()
+                    })
+
+                    if (userProfile) {
+                        await activityService.log(userProfile, 'Admin Override (Reprocessed)', comment, lead.id)
+                    }
+
+                    setSelectedLeadId(null)
+                    fetchLeads()
+                    return
+                }
+
                 let targetStage = lead.current_stage
 
                 // Functional Stage Progression via Role Mapping
@@ -179,10 +173,10 @@ export default function PipelinePage() {
                     else if (userProfile?.role === 'SALES_MANAGER' || userProfile?.role === 'SALES_EXECUTIVE') {
                         targetStage = 9
                     }
+                    // PM -> FINAL STEPS (already handled by PM_FOLLOW_UP/PM_CLOSING specifically, 
+                    // but adding generic safety here)
                 }
 
-                // activityService is now securely imported statically
-                
                 await updateLead(lead.id as any, { 
                     current_stage: targetStage,
                     last_viewed_by: userProfile?.full_name,
@@ -198,10 +192,9 @@ export default function PipelinePage() {
                         lead.id
                     )
 
-                    // General notification of movement
+                    // Notifications logic...
                     await notificationService.notifyAdmins('Lead Transmitted', `Lead LD-${lead.lead_id} moved to ${stageName} by ${userProfile.full_name}`, 'INFO')
 
-                    // Next Role Assignment Notifications
                     if (status === 'PM_FOLLOW_UP') {
                         await notificationService.notifyAdmins('ACTION REQUIRED: Follow-Up', `Project Manager flagged Lead LD-${lead.lead_id} for mandatory follow-up.`, 'ERROR')
                     } else {
@@ -216,10 +209,10 @@ export default function PipelinePage() {
                 }
 
                 setSelectedLeadId(null)
-                fetchLeads() // Refresh list
+                fetchLeads()
             }}
           />
-      ) : null}
+      )}
     </div>
   )
 }

@@ -8,7 +8,8 @@ import {
   Paperclip as PaperclipIcon, FlaskConical as FlaskIcon, 
   Clock as ClockIcon, MessageSquare as MsgIcon,
   User as UserIcon, Phone as PhoneIcon, Mail as MailIcon,
-  AlertTriangle as AlertTriangleIcon, RotateCcw as RotateCcwIcon
+  AlertTriangle as AlertTriangleIcon, RotateCcw as RotateCcwIcon,
+  Send, Archive, Zap, AlertCircle 
 } from 'lucide-react'
 
 import { cn } from '@/utils/cn'
@@ -18,11 +19,14 @@ interface AdminLeadProfileModalProps {
   isOpen: boolean
   onClose: () => void
   lead: Lead
-  onAction?: (action: string, comment: string) => void
+  userProfile?: any
+  onAction?: (status: string, comment: string) => void
 }
 
-export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction }: AdminLeadProfileModalProps) {
+export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfile, onAction }: AdminLeadProfileModalProps) {
   const [activities, setActivities] = useState<ActivityRecord[]>([])
+  const [comment, setComment] = useState('')
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (isOpen && lead.id) {
@@ -39,6 +43,31 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
   }
 
   const isImage = (url?: string) => url && (/\.(jpg|jpeg|png|webp|avif|gif)$/i.test(url) || url.startsWith('data:image/'))
+
+  const isPM = userProfile?.role === 'PROJECT_MANAGER'
+  const isRnDNode = userProfile?.role === 'RND_MANAGER' && lead.current_stage < 2;
+  const isPackagingNode = userProfile?.role === 'PACKAGING_MANAGER' && lead.current_stage >= 2 && lead.current_stage < 4;
+  const isSalesNode = (userProfile?.role === 'SALES_MANAGER' || userProfile?.role === 'SALES_EXECUTIVE') && lead.current_stage >= 4 && lead.current_stage < 9;
+  const isPMNode = userProfile?.role === 'PROJECT_MANAGER' && lead.current_stage >= 9 && lead.current_stage < 14;
+
+  const isMyTurn = isRnDNode || isPackagingNode || isSalesNode || isPMNode;
+  const isCompleted = lead.current_stage >= 17;
+  const isFollowUp = lead.current_stage >= 14 && lead.current_stage <= 16;
+
+  const handleSubmit = async (customStatus?: string) => {
+    if (!comment.trim()) {
+        alert("Action Denied: You must supply a mandatory operational remark before advancing the pipeline.")
+        return
+    }
+    
+    setLoading(true)
+    try {
+      if (onAction) await onAction(customStatus || 'AUTO_PROCEED', comment)
+      setComment('')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-[500] bg-slate-950 flex flex-col overflow-hidden animate-in fade-in duration-300">
@@ -266,8 +295,58 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
                 </div>
             </div>
 
-            {/* Admin Override Action (Only visible in Follow-Up loop) */}
-            {lead.current_stage >= 14 && lead.current_stage <= 16 && onAction && (
+            {/* Lead Action Form (Global Layout) */}
+            {isMyTurn ? (
+                <div className="bg-slate-900 rounded-[40px] p-8 mt-10 border border-slate-800 shadow-2xl flex flex-col space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <MsgIcon size={18} className="text-blue-500" />
+                            <h3 className="text-white font-black text-xs uppercase tracking-widest">Submit Operational Remark</h3>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-blue-500/10 rounded-full border border-blue-500/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                            <span className="text-[10px] font-black text-blue-400 uppercase tracking-tighter italic">Your Turn</span>
+                        </div>
+                    </div>
+                    
+                    <textarea 
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        placeholder="Enter finalized remarks to advance this lead in the pipeline..."
+                        className="w-full bg-white/5 border border-white/10 rounded-3xl p-6 text-white font-bold text-sm outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all min-h-[120px]"
+                    />
+
+                    <div className="flex items-center justify-end pt-2 border-t border-white/5">
+                        {isPM ? (
+                            <div className="flex gap-4 w-full">
+                                <button 
+                                    onClick={() => handleSubmit('PM_FOLLOW_UP')}
+                                    disabled={loading}
+                                    className="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-black py-5 rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[11px]"
+                                >
+                                    <Send size={18} /> {loading ? 'Routing...' : 'Flag for Follow-Up'}
+                                </button>
+                                <button 
+                                    onClick={() => handleSubmit('PM_CLOSING')}
+                                    disabled={loading}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-5 rounded-2xl transition-all shadow-xl flex items-center justify-center gap-3 uppercase tracking-widest text-[11px]"
+                                >
+                                    <Archive size={18} /> {loading ? 'Directing...' : 'Direct to Closing'}
+                                </button>
+                            </div>
+                        ) : (
+                            <button 
+                                onClick={() => handleSubmit()}
+                                disabled={loading}
+                                className="w-full bg-white text-slate-900 hover:bg-slate-100 font-black py-6 rounded-2xl transition-all shadow-xl flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-xs"
+                            >
+                                <Zap size={20} className="fill-slate-900" />
+                                {loading ? 'Synching Pipeline...' : 'Finalize Action & Proceed'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            ) : isFollowUp && (userProfile?.role === 'ADMIN' || userProfile?.role === 'OWNER') ? (
                 <div className="mt-8 bg-rose-50 border border-rose-200 p-8 rounded-[32px] flex items-center justify-between">
                     <div>
                         <h3 className="text-rose-900 font-black text-xl mb-1 flex items-center gap-2"><AlertTriangleIcon size={20} /> System Corrective Action</h3>
@@ -276,7 +355,7 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
                     <button 
                         onClick={() => {
                             if(window.confirm('Are you sure you want to reprocess this ticket back into the R&D Queue?')) {
-                                onAction('REPROCESS', 'Admin corrected ticket issues. Manually resubmitting into R&D for rework.');
+                                onAction?.('REPROCESS', 'Admin corrected ticket issues. Manually resubmitting into R&D for rework.');
                             }
                         }}
                         className="bg-slate-900 hover:bg-black text-white px-8 py-4 rounded-full font-black text-[11px] uppercase tracking-widest shadow-xl flex items-center gap-3 transition-colors"
@@ -284,6 +363,11 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, onAction 
                         <RotateCcwIcon size={16} />
                         Reprocess Lead to R&D
                     </button>
+                </div>
+            ) : !isCompleted && !isFollowUp && (
+                <div className="p-8 bg-slate-50 border border-slate-100 rounded-[32px] mt-10 flex items-center gap-4 text-slate-400 italic">
+                    <AlertCircle size={20} />
+                    <p className="text-xs font-bold uppercase tracking-widest">Awaiting Operation from {STAGES.find(s => s.number === lead.current_stage)?.owner.replace('_', ' ')}</p>
                 </div>
             )}
          </div>
