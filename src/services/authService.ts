@@ -6,13 +6,13 @@ import { notificationService } from './notificationService'
 const supabase = createClient()
 
 // Core organizational accounts — always available for Smart Recovery even if DB is empty
-const CORE_ACCOUNTS: Partial<Profile>[] = [
-  { email: 'admin@workflow.com',     full_name: 'ADMIN MANAGER',    role: 'ADMIN',              is_active: true },
-  { email: 'owner@workflow.com',     full_name: 'CORPORATE OWNER',  role: 'OWNER',              is_active: true },
-  { email: 'sales@workflow.com',     full_name: 'SALES DIRECTOR',   role: 'SALES_MANAGER',      is_active: true },
-  { email: 'rnd@workflow.com',       full_name: 'R&D LEAD',         role: 'RND_MANAGER',        is_active: true },
-  { email: 'packaging@workflow.com', full_name: 'PACKAGING HUB',    role: 'PACKAGING_MANAGER',  is_active: true },
-  { email: 'project@workflow.com',   full_name: 'OPS MANAGER',      role: 'PROJECT_MANAGER',    is_active: true },
+const CORE_ACCOUNTS: (Partial<Profile> & { password_hash: string })[] = [
+  { email: 'owner@workflow.com',     full_name: 'CORPORATE OWNER',  role: 'OWNER',              is_active: true, password_hash: '001' },
+  { email: 'admin@workflow.com',     full_name: 'ADMIN MANAGER',    role: 'ADMIN',              is_active: true, password_hash: '002' },
+  { email: 'r&dmanager@workflow.com', full_name: 'R&D LEAD',         role: 'RND_MANAGER',        is_active: true, password_hash: '003' },
+  { email: 'packagingmanager@workflow.com', full_name: 'PACKAGING HUB',    role: 'PACKAGING_MANAGER',  is_active: true, password_hash: '004' },
+  { email: 'salesmanager@workflow.com',     full_name: 'SALES DIRECTOR',   role: 'SALES_MANAGER',      is_active: true, password_hash: '005' },
+  { email: 'projectmanager@workflow.com',   full_name: 'OPS MANAGER',      role: 'PROJECT_MANAGER',    is_active: true, password_hash: '006' },
 ]
 
 export const authService = {
@@ -103,11 +103,16 @@ export const authService = {
               throw new Error('This account is strictly restricted by an Administrator. Contact support.');
           }
 
+          // Strict Password Verification
+          if (password && found.password_hash !== password) {
+              throw new Error('Credential mismatch: Incorrect security key for this account.');
+          }
+
           localStorage.setItem('demo_auth_user_role', found.role);
           localStorage.setItem('demo_auth_user_name', found.full_name);
           localStorage.setItem('demo_auth_user_email', found.email);
           
-          await activityService.log(found, 'Session Started', `User logged in securely directly via local sandbox authentication.`);
+          await activityService.log(found, 'Session Started', `User authenticated securely using institutional ID.`);
           return { role: found.role, name: found.full_name };
       }
 
@@ -157,12 +162,12 @@ export const authService = {
         if (stored) return JSON.parse(stored);
         
         const defaultProfiles = [
-            { user_id: 'adm-1', full_name: 'ADMIN MANAGER', email: 'admin@workflow.com', phone_number: '+1 555-0000', role: 'ADMIN', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'own-1', full_name: 'CORPORATE OWNER', email: 'owner@workflow.com', phone_number: '+1 555-9999', role: 'OWNER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'rnd-1', full_name: 'R&D LEAD', email: 'rnd@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pkg-1', full_name: 'PACKAGING HUB', email: 'packaging@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'sls-1', full_name: 'SALES DIRECTOR', email: 'sales@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' },
-            { user_id: 'pm-1', full_name: 'OPS MANAGER', email: 'project@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: 'PROTECTED', last_login: new Date().toISOString(), profile_picture: '' }
+            { user_id: 'own-1', full_name: 'CORPORATE OWNER', email: 'owner@workflow.com', phone_number: '+1 555-9999', role: 'OWNER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '001', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'adm-1', full_name: 'ADMIN MANAGER', email: 'admin@workflow.com', phone_number: '+1 555-0000', role: 'ADMIN', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '002', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'rnd-1', full_name: 'R&D LEAD', email: 'r&dmanager@workflow.com', phone_number: '+1 555-0101', role: 'RND_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '003', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pkg-1', full_name: 'PACKAGING HUB', email: 'packagingmanager@workflow.com', phone_number: '+1 555-0102', role: 'PACKAGING_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '004', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'sls-1', full_name: 'SALES DIRECTOR', email: 'salesmanager@workflow.com', phone_number: '+1 555-0103', role: 'SALES_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '005', last_login: new Date().toISOString(), profile_picture: '' },
+            { user_id: 'pm-1', full_name: 'OPS MANAGER', email: 'projectmanager@workflow.com', phone_number: '+1 555-0104', role: 'PROJECT_MANAGER', is_active: true, is_restricted: false, created_at: new Date().toISOString(), created_by: 'System', password_hash: '006', last_login: new Date().toISOString(), profile_picture: '' }
         ];
         localStorage.setItem('demo_profiles_v2', JSON.stringify(defaultProfiles));
         return defaultProfiles;
@@ -175,8 +180,10 @@ export const authService = {
   async createProfile(data: any) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
+        const roleEmail = `${data.role.toLowerCase().replace('_', '')}@workflow.com`
         const newProfile: Profile = {
             ...data,
+            email: roleEmail,
             user_id: Math.floor(Math.random() * 100000),
             is_active: true,
             created_at: new Date().toISOString()
