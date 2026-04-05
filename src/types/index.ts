@@ -1,14 +1,14 @@
 export type Role = 'ADMIN' | 'SALES_MANAGER' | 'SALES_EXECUTIVE' | 'RND_MANAGER' | 'PACKAGING_MANAGER' | 'OWNER' | 'PROJECT_MANAGER' | 'STAFF' | 'CLIENT' | 'COORDINATOR';
 
 export interface Profile {
-  user_id: number;
+  user_id: string | number;
   full_name: string;
   email: string;
   phone_number?: string;
   role: Role;
   is_active: boolean;
   is_restricted?: boolean;
-  created_by?: number;
+  created_by?: string | number;
   created_at: string;
   last_login?: string;
   profile_picture?: string;
@@ -47,7 +47,7 @@ export interface LeadApproval {
   approval_id: number;
   lead_id: number;
   approval_type: string;
-  reviewed_by: number;
+  reviewed_by: string | number;
   status: 'pending' | 'approved' | 'rejected';
   comment?: string;
   reviewed_at: string;
@@ -90,7 +90,7 @@ export interface Inquiry {
 
 export interface ActivityRecord {
   id: string;
-  user_id: number;
+  user_id: string | number;
   user_name: string;
   user_role: Role;
   action: string;

@@ -10,12 +10,12 @@ import ViewUserModal from '@/components/Admin/ViewUserModal'
 
 // Core accounts always shown — matches login quick-access
 const CORE_ACCOUNTS: Profile[] = [
-  { user_id: 1001, full_name: 'ADMIN MANAGER',    email: 'admin@workflow.com',     role: 'ADMIN',              is_active: true, created_at: '' },
-  { user_id: 1002, full_name: 'CORPORATE OWNER',  email: 'owner@workflow.com',     role: 'OWNER',              is_active: true, created_at: '' },
-  { user_id: 1003, full_name: 'SALES DIRECTOR',   email: 'sales@workflow.com',     role: 'SALES_MANAGER',      is_active: true, created_at: '' },
-  { user_id: 1004, full_name: 'R&D LEAD',         email: 'rnd@workflow.com',       role: 'RND_MANAGER',        is_active: true, created_at: '' },
-  { user_id: 1005, full_name: 'PACKAGING HUB',    email: 'packaging@workflow.com', role: 'PACKAGING_MANAGER',  is_active: true, created_at: '' },
-  { user_id: 1006, full_name: 'OPS MANAGER',      email: 'project@workflow.com',   role: 'PROJECT_MANAGER',    is_active: true, created_at: '' },
+  { user_id: 'owner@workflow.com',     full_name: 'CORPORATE OWNER',  email: 'owner@workflow.com',     role: 'OWNER',              is_active: true, created_at: '' },
+  { user_id: 'admin@workflow.com',     full_name: 'ADMIN MANAGER',    email: 'admin@workflow.com',     role: 'ADMIN',              is_active: true, created_at: '' },
+  { user_id: 'r&dmanager@workflow.com', full_name: 'R&D LEAD',         email: 'r&dmanager@workflow.com', role: 'RND_MANAGER',        is_active: true, created_at: '' },
+  { user_id: 'packagingmanager@workflow.com', full_name: 'PACKAGING HUB',    email: 'packagingmanager@workflow.com', role: 'PACKAGING_MANAGER',  is_active: true, created_at: '' },
+  { user_id: 'salesmanager@workflow.com',     full_name: 'SALES DIRECTOR',   email: 'salesmanager@workflow.com',     role: 'SALES_MANAGER',      is_active: true, created_at: '' },
+  { user_id: 'projectmanager@workflow.com',   full_name: 'OPS MANAGER',      email: 'projectmanager@workflow.com',   role: 'PROJECT_MANAGER',    is_active: true, created_at: '' },
 ]
 
 export default function AdminPage() {
@@ -25,6 +25,7 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
   const [openDropdownId, setOpenDropdownId] = useState<string | number | null>(null)
   const [filterType, setFilterType] = useState<'ACTIVE' | 'DELETED'>('ACTIVE')
+  const [searchTerm, setSearchTerm] = useState('')
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -81,6 +82,13 @@ export default function AdminPage() {
   }
 
   const displayedUsers = users.filter((u: any) => {
+      const matchesSearch = !searchTerm || 
+          u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.role?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchesSearch) return false;
+
       if (filterType === 'ACTIVE') return u.is_active !== false
       return u.is_active === false
   })
@@ -106,7 +114,9 @@ export default function AdminPage() {
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                 <input 
-                    placeholder="Search by name or role..." 
+                    placeholder="Search by name, role or email..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-100 outline-none transition-all text-sm"
                 />
             </div>
@@ -189,16 +199,16 @@ export default function AdminPage() {
                                                 )}
                                                 {user.is_active !== false ? (
                                                     <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_active', false); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 flex items-center gap-2 text-rose-500">
-                                                        <Lock size={12}/> Block Account
+                                                        <Lock size={12}/> System Suspend
                                                     </button>
                                                 ) : (
                                                     <button onClick={() => { setOpenDropdownId(null); handleUpdateStatus(user.user_id, 'is_active', true); }} className="w-full text-left px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-emerald-600 flex items-center gap-2 text-emerald-500">
-                                                        <Unlock size={12}/> Unblock Account
+                                                        <Unlock size={12}/> Restored Account
                                                     </button>
                                                 )}
                                                 <div className="h-px bg-slate-50 my-1"></div>
                                                 <button onClick={() => { setOpenDropdownId(null); handleDeleteUser(user.user_id); }} className="w-full text-left px-4 py-2 text-xs font-black text-rose-600 hover:bg-rose-50 flex items-center gap-2">
-                                                    <Trash2 size={12}/> Delete Account
+                                                    <Trash2 size={12}/> Permanent Purge (Deleted)
                                                 </button>
                                             </div>
                                         )}
