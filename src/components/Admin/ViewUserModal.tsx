@@ -45,12 +45,12 @@ export default function ViewUserModal({ isOpen, onClose, user }: ViewUserModalPr
            <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 ml-1">Database Profile Profile_Schema</h3>
            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              {/* Field 1: user_id */}
+              {/* Field 1: Account ID */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-start gap-4">
-                 <div className="p-2 bg-slate-50 rounded-xl text-slate-400"><Hash size={16}/></div>
+                 <div className="p-2 bg-blue-50 rounded-xl text-blue-500"><Mail size={16}/></div>
                  <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">user_id</label>
-                    <span className="text-sm font-bold text-slate-700 font-mono">{user.user_id}</span>
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">Account ID</label>
+                    <span className="text-sm font-bold text-slate-700 font-mono italic">{user.email || user.user_id}</span>
                  </div>
               </div>
 
@@ -63,14 +63,7 @@ export default function ViewUserModal({ isOpen, onClose, user }: ViewUserModalPr
                  </div>
               </div>
 
-              {/* Field 3: email */}
-              <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-start gap-4 col-span-1 md:col-span-2">
-                 <div className="p-2 bg-blue-50 rounded-xl text-blue-500"><Mail size={16}/></div>
-                 <div>
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block mb-0.5">email</label>
-                    <span className="text-sm font-bold text-slate-700">{user.email || 'N/A'}</span>
-                 </div>
-              </div>
+              {/* Field 3: email (Moved to Account ID above) */}
 
               {/* Field 4: phone_number */}
               <div className="bg-white p-4 rounded-2xl border border-slate-100 flex items-start gap-4">
