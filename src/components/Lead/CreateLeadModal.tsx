@@ -111,13 +111,10 @@ Image Attached: ${formData.requirement_brief ? 'Yes' : 'No'}
           
           <div className="flex items-center justify-between px-10 py-8 border-b border-slate-50 bg-slate-50/30 flex-shrink-0">
               <div>
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
-                          <Send size={20} />
-                      </div>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight">
                       Lead Enrollment
                   </h2>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-13">New Production Pipeline Configuration</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 ml-1">New Production Pipeline Configuration</p>
               </div>
               <button onClick={handleResetAndClose} className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-900 transition-all shadow-sm">
                   <X size={20} />
@@ -178,9 +175,9 @@ Image Attached: ${formData.requirement_brief ? 'Yes' : 'No'}
                               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 flex items-center gap-2"><Layers size={10}/> Role Category *</label>
                               <select value={formData.contact_role_category} onChange={e => setFormData({...formData, contact_role_category: e.target.value})} className="w-full px-5 py-4 bg-white border border-slate-200 rounded-2xl text-[12px] font-bold outline-none appearance-none">
                                   <option value="owner">Owner / CEO</option>
-                                  <option value="manager">Project Manager</option>
-                                  <option value="procurement">Procurement</option>
-                                  <option value="other">Stakeholder</option>
+                                  <option value="admin">Admin Manager</option>
+                                  <option value="sales">Sales Director</option>
+
                               </select>
                           </div>
                           <div className="space-y-2">
@@ -266,15 +263,8 @@ Image Attached: ${formData.requirement_brief ? 'Yes' : 'No'}
               </div>
               <div className="flex gap-4">
                   <button onClick={handleResetAndClose} className="px-8 py-5 font-black text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-widest text-[9px]">Abandon Session</button>
-                  <button form="create-lead-form" type="submit" disabled={isSubmitting} className="px-12 py-5 bg-blue-600 text-white font-black rounded-[20px] hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-blue-100 disabled:opacity-50 uppercase tracking-widest text-[11px] flex items-center gap-3">
-                      {isSubmitting ? 'Registering...' : (
-                          <>
-                              Register Lead
-                              <div className="w-4 h-4 bg-white/20 rounded-full flex items-center justify-center">
-                                  <Send size={10} />
-                              </div>
-                          </>
-                      )}
+                  <button form="create-lead-form" type="submit" disabled={isSubmitting} className="px-12 py-5 bg-blue-600 text-white font-black rounded-[20px] hover:bg-blue-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-blue-100 disabled:opacity-50 uppercase tracking-widest text-[11px] flex items-center justify-center">
+                      {isSubmitting ? 'Registering...' : 'Register Lead'}
                   </button>
               </div>
           </div>
