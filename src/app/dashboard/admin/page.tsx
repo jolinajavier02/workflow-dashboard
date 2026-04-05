@@ -69,6 +69,17 @@ export default function AdminPage() {
       }
   }
 
+  const handleDeleteUser = async (userId: string | number) => {
+      if (!confirm("CRITICAL: You are about to permanently remove this user account from the institutional database. This action is irreversible. Proceed?")) return;
+      try {
+          await authService.deleteProfile(userId)
+          toast.success("User account successfully purged from systems")
+          fetchUsers()
+      } catch (error: any) {
+          toast.error("Failed to delete user: " + error.message)
+      }
+  }
+
   const displayedUsers = users.filter((u: any) => {
       if (filterType === 'ACTIVE') return u.is_active !== false
       return u.is_active === false
@@ -185,6 +196,10 @@ export default function AdminPage() {
                                                         <Unlock size={12}/> Unblock Account
                                                     </button>
                                                 )}
+                                                <div className="h-px bg-slate-50 my-1"></div>
+                                                <button onClick={() => { setOpenDropdownId(null); handleDeleteUser(user.user_id); }} className="w-full text-left px-4 py-2 text-xs font-black text-rose-600 hover:bg-rose-50 flex items-center gap-2">
+                                                    <Trash2 size={12}/> Delete Account
+                                                </button>
                                             </div>
                                         )}
                                     </div>

@@ -187,7 +187,7 @@ export const authService = {
         const newProfile: Profile = {
             ...data,
             email: roleEmail,
-            user_id: Math.floor(Math.random() * 100000),
+            user_id: roleEmail,
             is_active: true,
             created_at: new Date().toISOString()
         }
@@ -261,6 +261,24 @@ export const authService = {
     
     // Live Production logic
     const { error } = await supabase.from('profiles').update({ password_hash: newPassword }).eq('id', userId)
+    if (error) throw error
+  },
+
+  async deleteProfile(userId: string | number) {
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
+        const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
+        const filtered = profiles.filter((p: any) => p.user_id !== userId && p.email !== userId)
+        localStorage.setItem('demo_profiles_v2', JSON.stringify(filtered))
+        
+        const currentUser = await this.getUserProfile()
+        if (currentUser) {
+            await activityService.log(currentUser, 'Delete Account', `Administrator permanently removed account with ID: ${userId}`)
+            await notificationService.notifyAdmins('Account Permanently Deleted', `User account ${userId} was removed from the system by ${currentUser.full_name}`, 'ERROR')
+        }
+        return
+    }
+
+    const { error } = await supabase.from('profiles').delete().eq('id', userId)
     if (error) throw error
   }
 }
