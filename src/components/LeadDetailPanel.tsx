@@ -106,18 +106,24 @@ userProfile, `Status Update: ${status}`, comment, lead.id)
             </button>
             <button onClick={onClose} className="p-3 text-slate-500 hover:text-white hover:bg-white/10 rounded-2xl transition-all"><X size={24} /></button>
         </div>
-
-        <div className="pr-20">
-            <h2 className="text-4xl font-black tracking-tighter leading-none mb-4">{isPrivileged ? lead.client_name : 'Lead Profile'}</h2>
-            <div className="flex items-center gap-3 mb-6">
-                <h1 className="px-4 py-2 bg-blue-600 text-white text-[10px] font-black uppercase tracking-[0.2em] rounded-xl shadow-lg shadow-blue-500/20">LD - {lead.lead_id.toString().padStart(6, '0')}</h1>
-                <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-lg">
-                    <div className={cn("w-2 h-2 rounded-full", getStatusColorClass(lead.color_status))}></div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
-                        {lead.color_status || 'INITIAL'}
-                    </span>
+        <div className="pr-20 space-y-4">
+            <div>
+                <h4 className="text-[10px] font-black text-blue-500 uppercase tracking-[0.3em] ml-1 mb-2">
+                    {isPrivileged ? lead.client_name : 'Lead Profile'}
+                </h4>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-6xl font-black text-white tracking-tighter leading-none">
+                        LD - {lead.lead_id.toString().padStart(6, '0')}
+                    </h1>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-lg h-fit">
+                        <div className={cn("w-2 h-2 rounded-full", getStatusColorClass(lead.color_status))}></div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">
+                            {lead.color_status || 'INITIAL'}
+                        </span>
+                    </div>
                 </div>
             </div>
+
             <div className="flex flex-wrap items-center gap-4 text-slate-400 text-sm font-medium">
                 <span className="flex items-center gap-1.5"><Building2 size={14} className="text-blue-500" /> {lead.company_name}</span>
                 <span className="w-1 h-1 bg-slate-700 rounded-full"></span>
