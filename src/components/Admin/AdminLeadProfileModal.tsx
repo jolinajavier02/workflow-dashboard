@@ -123,21 +123,43 @@ export default function AdminLeadProfileModal({ isOpen, onClose, lead, userProfi
                        lead.priority === 'high' ? "bg-rose-500/20 text-rose-500" : 
                        lead.priority === 'low' ? "bg-slate-500/20 text-slate-400" : 
                        "bg-amber-500/20 text-amber-500"
-                   )}>{lead.priority}</span>
+                   )}>
+                       {lead.priority === 'high' ? 'Urgent / High' : 
+                        lead.priority === 'low' ? 'Low Support' : 
+                        'Regular / Medium'}
+                   </span>
                 </div>
              </div>
            )}
 
-           <div className="flex items-center gap-6 flex-wrap opacity-60">
-              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                 <EyeIcon size={14} className="text-emerald-500"/>
-                 <span>LAST VIEWED BY:</span>
-                 <span className="text-slate-300 ml-1">{lead.last_viewed_by || 'ADMIN SYSTEM'}</span>
+           <div className="flex items-center gap-8 flex-wrap opacity-80 pt-2">
+              <div className="flex items-center gap-4">
+                  <div className="flex -space-x-2">
+                      {Array.from(new Set(activities.map(a => a.user_name))).slice(0, 5).map((name, i) => (
+                          <div key={i} title={name} className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-blue-600 flex items-center justify-center text-[10px] font-black text-white shadow-lg ring-1 ring-white/5 uppercase">
+                              {name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                      ))}
+                      {Array.from(new Set(activities.map(a => a.user_name))).length > 5 && (
+                          <div className="w-7 h-7 rounded-full border-2 border-[#0f172a] bg-slate-800 flex items-center justify-center text-[8px] font-black text-white shadow-lg ring-1 ring-white/5">
+                              +{Array.from(new Set(activities.map(a => a.user_name))).length - 5}
+                          </div>
+                      )}
+                  </div>
+                  <div className="space-y-0.5">
+                      <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
+                         <EyeIcon size={12} className="text-emerald-500"/>
+                         <span>Operational Audience</span>
+                      </div>
+                      <p className="text-[9px] font-black text-slate-500 tracking-tighter uppercase italic">Team insight monitored in real-time</p>
+                  </div>
               </div>
+
               <span className="w-1 h-1 bg-slate-700 rounded-full shrink-0"></span>
-              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
+              
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] uppercase tracking-widest">
                  <ClockIcon size={14} className="text-blue-500"/>
-                 <span>SYSTEM TIMESTAMP:</span>
+                 <span>Last System Access:</span>
                  <span className="text-slate-300 ml-1">{lead.updated_at ? new Date(lead.updated_at).toLocaleString() : '--'}</span>
               </div>
            </div>
