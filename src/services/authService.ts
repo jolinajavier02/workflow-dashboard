@@ -180,7 +180,10 @@ export const authService = {
   async createProfile(data: any) {
     if (process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder')) {
         const profiles = JSON.parse(localStorage.getItem('demo_profiles_v2') || '[]')
-        const roleEmail = `${data.role.toLowerCase().replace('_', '')}@workflow.com`
+        let rolePrefix = data.role.toLowerCase().replace('_', '')
+        if (data.role === 'RND_MANAGER') rolePrefix = 'r&dmanager'
+        
+        const roleEmail = `${rolePrefix}@workflow.com`
         const newProfile: Profile = {
             ...data,
             email: roleEmail,

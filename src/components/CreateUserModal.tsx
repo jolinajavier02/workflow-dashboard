@@ -28,7 +28,9 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
     e.preventDefault()
     setLoading(true)
     try {
-      const roleEmail = `${formData.role.toLowerCase().replace('_', '')}@workflow.com`
+      let rolePrefix = formData.role.toLowerCase().replace('_', '')
+      if (formData.role === 'RND_MANAGER') rolePrefix = 'r&dmanager'
+      const roleEmail = `${rolePrefix}@workflow.com`
       const payload = {
           full_name: formData.full_name,
           email: roleEmail,
@@ -44,7 +46,9 @@ export default function CreateUserModal({ isOpen, onClose, onSubmit }: CreateUse
     }
   }
 
-  const generatedEmail = `${formData.role.toLowerCase().replace('_', '')}@workflow.com`
+  let rolePrefix = formData.role.toLowerCase().replace('_', '')
+  if (formData.role === 'RND_MANAGER') rolePrefix = 'r&dmanager'
+  const generatedEmail = `${rolePrefix}@workflow.com`
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
